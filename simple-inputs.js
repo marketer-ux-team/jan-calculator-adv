@@ -8,132 +8,108 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Allow Comma Fields:', allowCommaFields);
 
     // Restrict input based on whether commas are allowed
-    numericInputs.forEach(input => {
-        // Initialize the flag to prevent recursive input events
-        input.isProgrammaticChange = false;
+    // Debounce function
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
 
-        console.log(`Setting up input restrictions for: ${input.id}`);
-        if (allowCommaFields.includes(input.id)) {
-            console.log(`${input.id} is allowed to have commas and periods.`);
+// Restrict input based on whether commas are allowed
+numericInputs.forEach(input => {
+    // Initialize the flag to prevent recursive input events
+    input.isProgrammaticChange = false;
 
-            // Allow numbers, commas, and periods for specific fields
-            input.addEventListener('input', () => {
-                if (input.isProgrammaticChange) {
-                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
-                    return;
-                }
+    console.log(`Setting up input restrictions for: ${input.id}`);
+    if (allowCommaFields.includes(input.id)) {
+        console.log(`${input.id} is allowed to have commas and periods.`);
 
-                console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
-                const originalValue = input.value;
+        // Allow numbers, commas, and periods for specific fields
+        input.addEventListener('input', debounce(() => {
+            if (input.isProgrammaticChange) return;
 
-                // Replace any character that is not a digit, comma, or period
-                let sanitizedValue = input.value.replace(/[^0-9,\.]/g, '')
-                                               .replace(/,{2,}/g, ',') // Replace multiple commas with single comma
-                                               .replace(/\.{2,}/g, '.') // Replace multiple periods with single period
-                                               .replace(/,\./g, '.') // Replace comma followed by period with period
-                                               .replace(/\.,/g, ','); // Replace period followed by comma with comma
+            console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
+            const originalValue = input.value;
 
-                // Remove only leading commas or periods
-                sanitizedValue = sanitizedValue.replace(/^[,\.]+/g, '');
+            // Replace any character that is not a digit, comma, or period
+            let sanitizedValue = originalValue.replace(/[^0-9,\.]/g, '')
+                                              .replace(/,{2,}/g, ',')  // Replace multiple commas with a single comma
+                                              .replace(/\.{2,}/g, '.') // Replace multiple periods with a single period
+                                              .replace(/,\./g, '.')    // Replace comma followed by period with period
+                                              .replace(/\.,/g, ',');    // Replace period followed by comma with comma
 
-                if (originalValue !== sanitizedValue) {
-                    console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
-                    // Update the flag to indicate a programmatic change
-                    input.isProgrammaticChange = true;
-                    input.value = sanitizedValue;
-                    input.isProgrammaticChange = false;
-                }
+            // Remove leading commas or periods
+            sanitizedValue = sanitizedValue.replace(/^[,\.]+/g, '');
 
-                // Convert commas to periods for processing by the slider
-                const valueForSlider = sanitizedValue.replace(/,/g, '.');
-                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
-            });
+            if (originalValue !== sanitizedValue) {
+                console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
+                input.isProgrammaticChange = true;
+                input.value = sanitizedValue;
+                input.isProgrammaticChange = false;
+            }
 
-            input.addEventListener('keydown', (event) => {
-                console.log(`Keydown event on ${input.id}: key="${event.key}", keyCode=${event.keyCode}, ctrlKey=${event.ctrlKey}, metaKey=${event.metaKey}`);
+            // Convert commas to periods for slider processing
+            const valueForSlider = sanitizedValue.replace(/,/g, '.');
+            updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
+        }, 300)); // Debounce with a 300ms delay
 
-                // Allow certain keys such as backspace, delete, tab, etc.
-                const allowedKeys = [
-                    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-                    'Home', 'End', 'ArrowLeft', 'ArrowRight'
-                ];
+        // Keydown event for handling input restrictions
+        input.addEventListener('keydown', (event) => {
+            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
+            if (allowedKeys.includes(event.key) || (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
+                return; // Allow common control keys
+            }
 
-                if (allowedKeys.includes(event.key) ||
-                    (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
-                    console.log(`Allowed key "${event.key}" pressed on ${input.id}.`);
-                    return; // Allow the keypress
-                }
+            // Prevent multiple commas or periods
+            if ((event.key === ',' && input.value.includes(',')) || (event.key === '.' && input.value.includes('.'))) {
+                event.preventDefault();
+                return;
+            }
 
-                // Allow one comma and one period
-                if ((event.key === ',' && input.value.includes(',')) ||
-                    (event.key === '.' && input.value.includes('.'))) {
-                    console.log(`Preventing multiple "${event.key}" in ${input.id}.`);
-                    event.preventDefault();
-                    return;
-                }
+            // Allow only numbers, commas, or periods
+            const isNumberKey = (!event.shiftKey && ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105))); // Numeric keys
+            if (!isNumberKey && event.key !== ',' && event.key !== '.') {
+                event.preventDefault();
+            }
+        });
 
-                // Ensure numeric input with commas or periods
-                const isNumberKey = 
-                    (!event.shiftKey && 
-                    ((event.keyCode >= 48 && event.keyCode <= 57) || // Top numbers
-                     (event.keyCode >= 96 && event.keyCode <= 105))); // Numpad numbers
+    } else {
+        console.log(`${input.id} is restricted to numbers only.`);
 
-                if (!isNumberKey && event.key !== ',' && event.key !== '.') {
-                    console.log(`Preventing non-numeric key "${event.key}" on ${input.id}.`);
-                    event.preventDefault();
-                }
-            });
-        } else {
-            console.log(`${input.id} is restricted to numbers only.`);
+        // Allow only numbers for other fields
+        input.addEventListener('input', debounce(() => {
+            if (input.isProgrammaticChange) return;
 
-            // Allow only numbers for other fields
-            input.addEventListener('input', () => {
-                if (input.isProgrammaticChange) {
-                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
-                    return;
-                }
+            console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
+            const originalValue = input.value;
+            const sanitizedValue = originalValue.replace(/[^0-9]/g, '');
 
-                console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
-                const originalValue = input.value;
-                const sanitizedValue = input.value.replace(/[^0-9]/g, '');
+            if (originalValue !== sanitizedValue) {
+                console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
+                input.isProgrammaticChange = true;
+                input.value = sanitizedValue;
+                input.isProgrammaticChange = false;
+            }
+        }, 300)); // Debounce with a 300ms delay
 
-                if (originalValue !== sanitizedValue) {
-                    console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
-                    // Update the flag to indicate a programmatic change
-                    input.isProgrammaticChange = true;
-                    input.value = sanitizedValue;
-                    input.isProgrammaticChange = false;
-                }
-            });
+        // Keydown event for handling numeric input
+        input.addEventListener('keydown', (event) => {
+            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
+            if (allowedKeys.includes(event.key) || (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
+                return; // Allow control keys
+            }
 
-            input.addEventListener('keydown', (event) => {
-                console.log(`Keydown event on ${input.id}: key="${event.key}", keyCode=${event.keyCode}, ctrlKey=${event.ctrlKey}, metaKey=${event.metaKey}`);
+            // Allow only numbers
+            const isNumberKey = (!event.shiftKey && ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)));
+            if (!isNumberKey) {
+                event.preventDefault();
+            }
+        });
+    }
+});
 
-                // Allow certain keys such as backspace, delete, tab, etc.
-                const allowedKeys = [
-                    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-                    'Home', 'End', 'ArrowLeft', 'ArrowRight'
-                ];
-
-                if (allowedKeys.includes(event.key) ||
-                    (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
-                    console.log(`Allowed key "${event.key}" pressed on ${input.id}.`);
-                    return; // Allow the keypress
-                }
-
-                // Ensure numeric input only for other fields
-                const isNumberKey = 
-                    (!event.shiftKey && 
-                    ((event.keyCode >= 48 && event.keyCode <= 57) || // Top numbers
-                     (event.keyCode >= 96 && event.keyCode <= 105))); // Numpad numbers
-
-                if (!isNumberKey) {
-                    console.log(`Preventing non-numeric key "${event.key}" on ${input.id}.`);
-                    event.preventDefault();
-                }
-            });
-        }
-    });
 
     // Function to update range slider position and value for weight and KFA
     function updateRangeSliderPosition(rangeSliderWrapperClass, value, withTransition) {
