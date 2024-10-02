@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Update handle text based on input value
-    function setHandleText(rangeSliderSelector, inputId) {
+    function setHandleText(rangeSliderSelector, inputId, withTransition) {
         const inputElement = document.getElementById(inputId);
         if (!inputElement) return;
 
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!handleText) return;
 
         handleText.textContent = inputValue;
-        updateRangeSliderPosition(rangeSliderSelector, inputValue, true);
+        updateRangeSliderPosition(rangeSliderSelector, inputValue, withTransition);
         handleInputChange();
     }
 
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Use requestAnimationFrame for smoother updates
                 requestAnimationFrame(() => {
-                    setHandleText(rangeSliderSelector, inputId);
+                    setHandleText(rangeSliderSelector, inputId, false); // Disable transition during drag
                 });
             }
         }
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 inputElement.isProgrammaticChange = true;
                 inputElement.value = value;
                 inputElement.isProgrammaticChange = false;
-                setHandleText(rangeSliderSelector, inputId);
+                setHandleText(rangeSliderSelector, inputId, true); // Enable transition for click events
             }
         }
     }
