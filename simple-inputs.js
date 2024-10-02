@@ -135,12 +135,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Function to update range slider position and value for weight and KFA
-    function updateRangeSliderPosition(rangeSliderWrapperClass, value, withTransition) {
-        console.log(`Updating range slider position for "${rangeSliderWrapperClass}" with value: ${value}, transition: ${withTransition}`);
-        const wrapper = document.querySelector(`.${rangeSliderWrapperClass}`);
+    // Function to update range slider position and value
+    function updateRangeSliderPosition(rangeSliderSelector, value, withTransition) {
+        console.log(`Updating range slider position for "${rangeSliderSelector}" with value: ${value}, transition: ${withTransition}`);
+        const wrapper = document.querySelector(`.${rangeSliderSelector}`);
         if (!wrapper) {
-            console.log(`Wrapper with class "${rangeSliderWrapperClass}" not found.`);
+            console.log(`Wrapper with selector "${rangeSliderSelector}" not found.`);
             return;
         }
 
@@ -152,21 +152,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log(`Range slider min: ${min}, max: ${max}`);
 
-        let stepSize = 1;
-        if (wrapper.getAttribute("fs-rangeslider-element") === 'wrapper-4') {
-            const totalSteps = 500;
-            stepSize = (max - min) / totalSteps;
-            console.log(`Special case for "wrapper-4": Total steps = ${totalSteps}, step size = ${stepSize}`);
-        } else {
-            console.log(`Normal step size of 1 applied.`);
-        }
-
-        // Remove commas and periods for numerical processing
-        const numericValue = parseFloat(value.replace(/,/g, '.'));
+        // Replace comma with period and parse the value
+        const numericValue = parseFloat(value.replace(',', '.'));
         console.log(`Parsed numeric value: ${numericValue}`);
 
         if (isNaN(numericValue)) {
-            console.log(`Invalid numeric value for "${rangeSliderWrapperClass}": "${value}"`);
+            console.log(`Invalid numeric value for "${rangeSliderSelector}": "${value}"`);
             return;
         }
 
@@ -190,13 +181,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Set handle left to ${handle.style.left} and fill width to ${fill.style.width}`);
     }
 
-
-    // Sync input field value with slider handle text for weight and KFA
-    function setInputValue(rangeSliderWrapperClass, inputId) {
-        console.log(`Setting input value for "${inputId}" based on slider "${rangeSliderWrapperClass}"`);
-        const handleText = document.querySelector(`.${rangeSliderWrapperClass} .inside-handle-text`);
+    // Sync input field value with slider handle text
+    function setInputValue(rangeSliderSelector, inputId) {
+        console.log(`Setting input value for "${inputId}" based on slider "${rangeSliderSelector}"`);
+        const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
         if (!handleText) {
-            console.log(`Handle text element not found for "${rangeSliderWrapperClass}".`);
+            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
             return;
         }
 
@@ -214,9 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
         handleInputChange();
     }
 
-    // Update handle text based on input value for weight and KFA
-    function setHandleText(rangeSliderWrapperClass, inputId) {
-        console.log(`Setting handle text for slider "${rangeSliderWrapperClass}" based on input "${inputId}"`);
+    // Update handle text based on input value
+    function setHandleText(rangeSliderSelector, inputId) {
+        console.log(`Setting handle text for slider "${rangeSliderSelector}" based on input "${inputId}"`);
         const inputElement = document.getElementById(inputId);
         if (!inputElement) {
             console.log(`Input element with ID "${inputId}" not found.`);
@@ -224,191 +214,105 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const inputValue = inputElement.value;
-        const handleText = document.querySelector(`.${rangeSliderWrapperClass} .inside-handle-text`);
+        const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
         if (!handleText) {
-            console.log(`Handle text element not found for "${rangeSliderWrapperClass}".`);
+            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
             return;
         }
 
         handleText.textContent = inputValue;
         console.log(`Updated handle text to "${inputValue}"`);
-        updateRangeSliderPosition(rangeSliderWrapperClass, inputValue, true);
+        updateRangeSliderPosition(rangeSliderSelector, inputValue, true);
         handleInputChange();
     }
 
-    // Function to handle input changes for weight and KFA
+    // Function to handle input changes
     function handleInputChange() {
-        console.log('Handling input changes for weight and KFA.');
-        const weight = document.getElementById("weight-3-kfa") ? document.getElementById("weight-3-kfa").value : 'N/A';
-        const kfa = document.getElementById("kfa-2") ? document.getElementById("kfa-2").value : 'N/A';
-        console.log(`Current weight-3-kfa: "${weight}", kfa-2: "${kfa}"`);
-        // Additional logic can be added here as needed
+        console.log('Handling input changes.');
+        // Implement your logic here
     }
 
-// Function to handle input changes and slider sync for weight and KFA
-// Function to handle input changes and slider sync for weight and KFA
-function observeChanges(rangeSliderWrapperClass, inputId) {
-    console.log(`Setting up MutationObserver for "${inputId}" with slider "${rangeSliderWrapperClass}"`);
-    
-    const handleTextElement = document.querySelector(`.${rangeSliderWrapperClass} .inside-handle-text`);
-    const inputElement = document.getElementById(inputId);
+    // Function to observe changes and sync input and slider
+    function observeChanges(rangeSliderSelector, inputId) {
+        console.log(`Setting up MutationObserver for "${inputId}" with slider "${rangeSliderSelector}"`);
+        
+        const handleTextElement = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
+        const inputElement = document.getElementById(inputId);
 
-    if (!handleTextElement || !inputElement) {
-        console.log(`Handle text element or input element not found for "${rangeSliderWrapperClass}" and "${inputId}".`);
-        return;
-    }
+        if (!handleTextElement || !inputElement) {
+            console.log(`Handle text element or input element not found for "${rangeSliderSelector}" and "${inputId}".`);
+            return;
+        }
 
-    const observer = new MutationObserver(() => {
-        console.log(`MutationObserver detected a change in "${rangeSliderWrapperClass}".`);
+        const observer = new MutationObserver(() => {
+            console.log(`MutationObserver detected a change in "${rangeSliderSelector}".`);
 
-        // Only update input if handle text is not empty, not "0", and if the user has interacted
-        if (handleTextElement.textContent !== "" && handleTextElement.textContent !== "0" && inputElement.value !== handleTextElement.textContent) {
-            if (inputElement.value === "") {
-                console.log(`Skipping update because input "${inputId}" is still empty.`);
+            // Only update input if handle text is not empty and different from input value
+            if (handleTextElement.textContent !== "" && inputElement.value !== handleTextElement.textContent) {
+                inputElement.isProgrammaticChange = true;
+                inputElement.value = handleTextElement.textContent;
+                inputElement.isProgrammaticChange = false;
+                handleInputChange();
+            }
+        });
+
+        observer.observe(handleTextElement, { childList: true });
+
+        inputElement.addEventListener('input', () => {
+            if (inputElement.isProgrammaticChange) {
+                console.log(`Programmatic change detected on "${inputId}". Skipping input event.`);
                 return;
             }
-            console.log(`Updating input "${inputId}" value from "${inputElement.value}" to "${handleTextElement.textContent}"`);
-            inputElement.isProgrammaticChange = true;
-            inputElement.value = handleTextElement.textContent;
-            inputElement.isProgrammaticChange = false;
-            handleInputChange();
-        }
-    });
 
-    observer.observe(handleTextElement, { childList: true });
+            console.log(`Input event detected on "${inputId}". Value: "${inputElement.value}"`);
+            
+            // Do not update handle text if the input is empty
+            if (inputElement.value.trim() === "") {
+                console.log(`Input is empty for "${inputId}". No changes made.`);
+                return;
+            }
 
-    inputElement.addEventListener('input', () => {
-        if (inputElement.isProgrammaticChange) {
-            console.log(`Programmatic change detected on "${inputId}". Skipping input event.`);
-            return;
-        }
+            if (inputElement.value !== handleTextElement.textContent) {
+                console.log(`Updating handle text for "${rangeSliderSelector}" to "${inputElement.value}"`);
+                // Use the flag to prevent recursive input event triggering
+                inputElement.isProgrammaticChange = true;
+                handleTextElement.textContent = inputElement.value;
+                inputElement.isProgrammaticChange = false;
+                updateRangeSliderPosition(rangeSliderSelector, inputElement.value, true);
+            }
+        });
+    }
 
-        console.log(`Input event detected on "${inputId}". Value: "${inputElement.value}"`);
-        
-        // Do not update handle text if the input is empty
-        if (inputElement.value.trim() === "") {
-            console.log(`Input is empty for "${inputId}". No changes made.`);
-            return;
-        }
-
-        if (inputElement.value !== handleTextElement.textContent) {
-            console.log(`Updating handle text for "${rangeSliderWrapperClass}" to "${inputElement.value}"`);
-            // Use the flag to prevent recursive input event triggering
-            inputElement.isProgrammaticChange = true;
-            handleTextElement.textContent = inputElement.value;
-            inputElement.isProgrammaticChange = false;
-            updateRangeSliderPosition(rangeSliderWrapperClass, inputElement.value, true);
-        }
-    });
-}
-
-// Initialization of range sliders and input synchronization
-document.addEventListener('DOMContentLoaded', function() {
-    const numericInputs = document.querySelectorAll('.input-calculator');
-
-    // List of input IDs that should allow commas
-    const allowCommaFields = ['wunschgewicht', 'weight-2', 'weight-3-kfa'];
-
-    console.log('Initializing input restrictions...');
-    console.log('Allow Comma Fields:', allowCommaFields);
-
-    // Restrict input based on whether commas are allowed
-    numericInputs.forEach(input => {
-        // Initialize the flag to prevent recursive input events
-        input.isProgrammaticChange = false;
-
-        console.log(`Setting up input restrictions for: ${input.id}`);
-        if (allowCommaFields.includes(input.id)) {
-            console.log(`${input.id} is allowed to have commas and periods.`);
-
-            // Allow numbers, commas, and periods for specific fields
-            input.addEventListener('input', () => {
-                if (input.isProgrammaticChange) {
-                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
-                    return;
-                }
-
-                console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
-                const originalValue = input.value;
-
-                // Replace any character that is not a digit, comma, or period
-                let sanitizedValue = input.value.replace(/[^0-9,\.]/g, '')
-                                               .replace(/,{2,}/g, ',') // Replace multiple commas with single comma
-                                               .replace(/\.{2,}/g, '.') // Replace multiple periods with single period
-                                               .replace(/,\./g, '.') // Replace comma followed by period with period
-                                               .replace(/\.,/g, ','); // Replace period followed by comma with comma
-
-                // Remove only leading commas or periods
-                sanitizedValue = sanitizedValue.replace(/^[,\.]+/g, '');
-
-                if (originalValue !== sanitizedValue) {
-                    console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
-                    // Update the flag to indicate a programmatic change
-                    input.isProgrammaticChange = true;
-                    input.value = sanitizedValue;
-                    input.isProgrammaticChange = false;
-                }
-
-                // Convert commas to periods for processing by the slider
-                const valueForSlider = sanitizedValue.replace(/,/g, '.');
-                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
-            });
-        }
-    });
-
-    // Initialize values and add listeners for weight and KFA
-    console.log('Initializing range sliders and input synchronization.');
-
-    // Define the range slider wrappers and corresponding input IDs
-    const slidersAndInputs = [
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-5"]', input: 'weight-3-kfa' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-6"]', input: 'kfa-2' },
-        { wrapper: 'wrapper-step-range_slider', input: 'age-2' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-2"]', input: 'height-2' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-3"]', input: 'weight-2' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]', input: 'steps-4' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-7"]', input: 'wunschgewicht' }
-    ];
-
-    slidersAndInputs.forEach(({ wrapper, input }) => {
-        observeChanges(wrapper, input);
-    });
-
-    console.log('Range sliders and input synchronization setup complete.');
-});
-
-
-
-    // Add listeners for slider handle movement for weight and KFA
-    function addHandleMovementListener(rangeSliderWrapperClass, inputId) {
-        console.log(`Adding handle movement listeners for "${rangeSliderWrapperClass}" and input "${inputId}"`);
-        const handle = document.querySelector(`.${rangeSliderWrapperClass} .range-slider_handle`);
-        const slider = document.querySelector(`.${rangeSliderWrapperClass} .track-range-slider`);
+    // Add listeners for slider handle movement
+    function addHandleMovementListener(rangeSliderSelector, inputId) {
+        console.log(`Adding handle movement listeners for "${rangeSliderSelector}" and input "${inputId}"`);
+        const handle = document.querySelector(`.${rangeSliderSelector} .range-slider_handle`);
+        const slider = document.querySelector(`.${rangeSliderSelector} .track-range-slider`);
 
         if (!handle || !slider) {
-            console.log(`Handle or slider element not found for "${rangeSliderWrapperClass}".`);
+            console.log(`Handle or slider element not found for "${rangeSliderSelector}".`);
             return;
         }
 
         handle.addEventListener('mousedown', () => {
-            console.log(`Mouse down on handle of "${rangeSliderWrapperClass}".`);
+            console.log(`Mouse down on handle of "${rangeSliderSelector}".`);
             const inputElement = document.getElementById(inputId);
             if (!inputElement) {
                 console.log(`Input element with ID "${inputId}" not found.`);
                 return;
             }
-            updateRangeSliderPosition(rangeSliderWrapperClass, inputElement.value, false);
+            updateRangeSliderPosition(rangeSliderSelector, inputElement.value, false);
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
         });
 
         slider.addEventListener('click', (event) => {
-            console.log(`Slider "${rangeSliderWrapperClass}" clicked at position: (${event.clientX}, ${event.clientY})`);
+            console.log(`Slider "${rangeSliderSelector}" clicked at position: (${event.clientX}, ${event.clientY})`);
             const rect = slider.getBoundingClientRect();
             const offsetX = event.clientX - rect.left;
             const percentage = (offsetX / slider.clientWidth) * 100;
 
-            const wrapper = document.querySelector(`.${rangeSliderWrapperClass}`);
+            const wrapper = document.querySelector(`.${rangeSliderSelector}`);
             const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
             const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
             const value = Math.round(min + (percentage / 100) * (max - min));
@@ -420,45 +324,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 inputElement.value = value;
                 inputElement.isProgrammaticChange = false;
                 console.log(`Updated input "${inputId}" value to "${value}" from slider click.`);
-                setHandleText(rangeSliderWrapperClass, inputId);
+                setHandleText(rangeSliderSelector, inputId);
             } else {
                 console.log(`Input element with ID "${inputId}" not found.`);
             }
         });
 
         function onMouseMove(event) {
-            console.log(`Mouse move detected on "${rangeSliderWrapperClass}".`);
-            setInputValue(rangeSliderWrapperClass, inputId);
+            console.log(`Mouse move detected on "${rangeSliderSelector}".`);
+            setInputValue(rangeSliderSelector, inputId);
         }
 
         function onMouseUp(event) {
-            console.log(`Mouse up detected on "${rangeSliderWrapperClass}". Removing mousemove and mouseup listeners.`);
+            console.log(`Mouse up detected on "${rangeSliderSelector}". Removing mousemove and mouseup listeners.`);
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         }
     }
 
-    // Initialize values and add listeners for weight and KFA
+    // Initialize sliders and inputs
     console.log('Initializing range sliders and input synchronization.');
 
-    // Define the range slider wrappers and corresponding input IDs
+    // Define the range slider selectors and corresponding input IDs
     const slidersAndInputs = [
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-5"]', input: 'weight-3-kfa' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-6"]', input: 'kfa-2' },
-        { wrapper: 'wrapper-step-range_slider', input: 'age-2' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-2"]', input: 'height-2' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-3"]', input: 'weight-2' },
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]', input: 'steps-4' }, // New steps slider
-        { wrapper: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-7"]', input: 'wunschgewicht' } // New steps slider
-
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-5"]', input: 'weight-3-kfa' },
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-6"]', input: 'kfa-2' },
+        { selector: 'wrapper-step-range_slider', input: 'age-2' },
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-2"]', input: 'height-2' },
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-3"]', input: 'weight-2' },
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]', input: 'steps-4' },
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-7"]', input: 'wunschgewicht' }
     ];
 
-    slidersAndInputs.forEach(({ wrapper, input }) => {
-        setInputValue(wrapper, input);
-        addHandleMovementListener(wrapper, input);
-        observeChanges(wrapper, input);
+    slidersAndInputs.forEach(({ selector, input }) => {
+        setInputValue(selector, input);
+        addHandleMovementListener(selector, input);
+        observeChanges(selector, input);
     });
 
     console.log('Range sliders and input synchronization setup complete.');
 });
-
