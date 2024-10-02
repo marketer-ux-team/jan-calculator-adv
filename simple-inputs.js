@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Apply transition if needed
         if (withTransition) {
-            handle.style.transition = 'left 0.3s ease';
-            fill.style.transition = 'width 0.3s ease';
+            handle.style.transition = 'left 0.0s ease';
+            fill.style.transition = 'width 0.0s ease';
         } else {
             handle.style.transition = 'none';
             fill.style.transition = 'none';
