@@ -69,6 +69,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
         const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
 
+        // If value is empty, do not update the slider position
+        if (value.trim() === '') {
+            // Optionally, clear the handle text
+            const handleText = handle.querySelector('.inside-handle-text');
+            if (handleText) handleText.textContent = '';
+            return;
+        }
+
         // Replace comma with period and parse the value
         let numericValue = parseFloat(value.replace(',', '.'));
 
@@ -122,6 +130,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!handleText) return;
 
         handleText.textContent = inputValue;
+
+        // If inputValue is empty, do not update the slider position
+        if (inputValue.trim() === '') {
+            // Optionally, clear the handle text
+            handleText.textContent = '';
+            return;
+        }
+
         updateRangeSliderPosition(rangeSliderSelector, inputValue, withTransition);
         handleInputChange();
     }
@@ -139,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!handleTextElement || !inputElement) return;
 
         const observer = new MutationObserver(() => {
-            // Update input value regardless of whether handle text is empty
+            // Update input value to match handle text
             if (inputElement.value !== handleTextElement.textContent) {
                 inputElement.isProgrammaticChange = true;
                 inputElement.value = handleTextElement.textContent;
@@ -153,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
         inputElement.addEventListener('input', () => {
             if (inputElement.isProgrammaticChange) return;
 
-            // Allow updating handle text even if the input is empty
             // Use the flag to prevent recursive input event triggering
             inputElement.isProgrammaticChange = true;
             handleTextElement.textContent = inputElement.value;
