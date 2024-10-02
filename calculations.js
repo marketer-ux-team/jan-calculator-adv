@@ -56,18 +56,15 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
     });
 
     weightInput.addEventListener('input', () => {
-        weight = parseInt(weightInput.value, 10) || 0;
         calculateResult();
     });
 
     // Input change listeners for KFA inputs
     weightKfaInput.addEventListener('input', () => {
-        weight = parseInt(weightKfaInput.value, 10) || 0;
         calculateResult();
     });
 
     kfaInput.addEventListener('input', () => {
-        kfa = parseInt(kfaInput.value, 10) || 0;
         calculateResult();
     });
 
