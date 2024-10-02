@@ -4,26 +4,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // List of input IDs that should allow commas
     const allowCommaFields = ['wunschgewicht', 'weight-2', 'weight-3-kfa'];
 
-    console.log('Initializing input restrictions...');
-    console.log('Allow Comma Fields:', allowCommaFields);
-
     // Restrict input based on whether commas are allowed
     numericInputs.forEach(input => {
         // Initialize the flag to prevent recursive input events
         input.isProgrammaticChange = false;
 
-        console.log(`Setting up input restrictions for: ${input.id}`);
         if (allowCommaFields.includes(input.id)) {
-            console.log(`${input.id} is allowed to have commas and periods.`);
-
             // Allow numbers, commas, and periods for specific fields
             input.addEventListener('input', () => {
-                if (input.isProgrammaticChange) {
-                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
-                    return;
-                }
+                if (input.isProgrammaticChange) return;
 
-                console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
                 const originalValue = input.value;
 
                 // Replace any character that is not a digit, comma, or period
@@ -37,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 sanitizedValue = sanitizedValue.replace(/^[,\.]+/g, '');
 
                 if (originalValue !== sanitizedValue) {
-                    console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
                     // Update the flag to indicate a programmatic change
                     input.isProgrammaticChange = true;
                     input.value = sanitizedValue;
@@ -49,21 +38,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
             });
         } else {
-            console.log(`${input.id} is restricted to numbers only.`);
-
             // Allow only numbers for other fields
             input.addEventListener('input', () => {
-                if (input.isProgrammaticChange) {
-                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
-                    return;
-                }
+                if (input.isProgrammaticChange) return;
 
-                console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
                 const originalValue = input.value;
                 const sanitizedValue = input.value.replace(/[^0-9]/g, '');
 
                 if (originalValue !== sanitizedValue) {
-                    console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
                     // Update the flag to indicate a programmatic change
                     input.isProgrammaticChange = true;
                     input.value = sanitizedValue;
@@ -78,12 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to update range slider position and value
     function updateRangeSliderPosition(rangeSliderSelector, value, withTransition) {
-        console.log(`Updating range slider position for "${rangeSliderSelector}" with value: ${value}, transition: ${withTransition}`);
         const wrapper = document.querySelector(`.${rangeSliderSelector}`);
-        if (!wrapper) {
-            console.log(`Wrapper with selector "${rangeSliderSelector}" not found.`);
-            return;
-        }
+        if (!wrapper) return;
 
         const handle = wrapper.querySelector(".range-slider_handle");
         const fill = wrapper.querySelector(".range-slider_fill");
@@ -91,103 +69,76 @@ document.addEventListener('DOMContentLoaded', function() {
         const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
         const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
 
-        console.log(`Range slider min: ${min}, max: ${max}`);
-
         // Replace comma with period and parse the value
         let numericValue = parseFloat(value.replace(',', '.'));
-        console.log(`Parsed numeric value: ${numericValue}`);
 
         if (isNaN(numericValue)) {
-            console.log(`Invalid numeric value for "${rangeSliderSelector}": "${value}"`);
             numericValue = min; // Set to minimum value when input is invalid
         }
 
         // Ensure the value stays within the range
         const adjustedValue = Math.max(min, Math.min(numericValue, max));
-        console.log(`Adjusted value within range: ${adjustedValue}`);
 
         // Calculate percentage relative to the slider's range
         const percentage = ((adjustedValue - min) / (max - min)) * 100;
-        console.log(`Calculated percentage: ${percentage}%`);
 
         // Apply transition if needed
-        handle.style.transition = withTransition ? 'left 0.3s ease' : 'none';
-        fill.style.transition = withTransition ? 'width 0.3s ease' : 'none';
+        if (withTransition) {
+            handle.style.transition = 'left 0.3s ease';
+            fill.style.transition = 'width 0.3s ease';
+        } else {
+            handle.style.transition = 'none';
+            fill.style.transition = 'none';
+        }
 
         // Set handle and fill to a max of 100% and a min of 0%
         const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
         handle.style.left = `${clampedPercentage}%`;
         fill.style.width = `${clampedPercentage}%`;
-
-        console.log(`Set handle left to ${handle.style.left} and fill width to ${fill.style.width}`);
     }
 
     // Sync input field value with slider handle text
     function setInputValue(rangeSliderSelector, inputId) {
-        console.log(`Setting input value for "${inputId}" based on slider "${rangeSliderSelector}"`);
         const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
-        if (!handleText) {
-            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
-            return;
-        }
+        if (!handleText) return;
 
         const inputElement = document.getElementById(inputId);
-        if (!inputElement) {
-            console.log(`Input element with ID "${inputId}" not found.`);
-            return;
-        }
+        if (!inputElement) return;
 
         // Use the flag to prevent the 'input' event listener from modifying the value
         inputElement.isProgrammaticChange = true;
         inputElement.value = handleText.textContent;
-        console.log(`Updated input "${inputId}" value to "${handleText.textContent}"`);
         inputElement.isProgrammaticChange = false;
         handleInputChange();
     }
 
     // Update handle text based on input value
     function setHandleText(rangeSliderSelector, inputId) {
-        console.log(`Setting handle text for slider "${rangeSliderSelector}" based on input "${inputId}"`);
         const inputElement = document.getElementById(inputId);
-        if (!inputElement) {
-            console.log(`Input element with ID "${inputId}" not found.`);
-            return;
-        }
+        if (!inputElement) return;
 
         const inputValue = inputElement.value;
         const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
-        if (!handleText) {
-            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
-            return;
-        }
+        if (!handleText) return;
 
         handleText.textContent = inputValue;
-        console.log(`Updated handle text to "${inputValue}"`);
         updateRangeSliderPosition(rangeSliderSelector, inputValue, true);
         handleInputChange();
     }
 
     // Function to handle input changes
     function handleInputChange() {
-        console.log('Handling input changes.');
-        // Implement your logic here
+        // Implement your logic here, e.g., calculate BMI or update other UI elements
     }
 
     // Function to observe changes and sync input and slider
     function observeChanges(rangeSliderSelector, inputId) {
-        console.log(`Setting up MutationObserver for "${inputId}" with slider "${rangeSliderSelector}"`);
-        
         const handleTextElement = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
         const inputElement = document.getElementById(inputId);
 
-        if (!handleTextElement || !inputElement) {
-            console.log(`Handle text element or input element not found for "${rangeSliderSelector}" and "${inputId}".`);
-            return;
-        }
+        if (!handleTextElement || !inputElement) return;
 
         const observer = new MutationObserver(() => {
-            console.log(`MutationObserver detected a change in "${rangeSliderSelector}".`);
-
             // Update input value regardless of whether handle text is empty
             if (inputElement.value !== handleTextElement.textContent) {
                 inputElement.isProgrammaticChange = true;
@@ -200,15 +151,9 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(handleTextElement, { childList: true });
 
         inputElement.addEventListener('input', () => {
-            if (inputElement.isProgrammaticChange) {
-                console.log(`Programmatic change detected on "${inputId}". Skipping input event.`);
-                return;
-            }
+            if (inputElement.isProgrammaticChange) return;
 
-            console.log(`Input event detected on "${inputId}". Value: "${inputElement.value}"`);
-            
             // Allow updating handle text even if the input is empty
-            console.log(`Updating handle text for "${rangeSliderSelector}" to "${inputElement.value}"`);
             // Use the flag to prevent recursive input event triggering
             inputElement.isProgrammaticChange = true;
             handleTextElement.textContent = inputElement.value;
@@ -217,33 +162,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add listeners for slider handle movement
+    // Add listeners for slider handle movement, including touch events
     function addHandleMovementListener(rangeSliderSelector, inputId) {
-        console.log(`Adding handle movement listeners for "${rangeSliderSelector}" and input "${inputId}"`);
         const handle = document.querySelector(`.${rangeSliderSelector} .range-slider_handle`);
         const slider = document.querySelector(`.${rangeSliderSelector} .track-range-slider`);
 
-        if (!handle || !slider) {
-            console.log(`Handle or slider element not found for "${rangeSliderSelector}".`);
-            return;
+        if (!handle || !slider) return;
+
+        // Variables to track dragging state
+        let isDragging = false;
+
+        // Handle both mouse and touch events for the handle
+        handle.addEventListener('mousedown', startHandleMovement);
+        handle.addEventListener('touchstart', startHandleMovement, { passive: false });
+
+        function startHandleMovement(event) {
+            event.preventDefault(); // Prevent default touch scrolling behavior
+            isDragging = true;
+
+            document.addEventListener('mousemove', onHandleMove);
+            document.addEventListener('touchmove', onHandleMove, { passive: false });
+            document.addEventListener('mouseup', endHandleMovement);
+            document.addEventListener('touchend', endHandleMovement);
         }
 
-        handle.addEventListener('mousedown', () => {
-            console.log(`Mouse down on handle of "${rangeSliderSelector}".`);
-            const inputElement = document.getElementById(inputId);
-            if (!inputElement) {
-                console.log(`Input element with ID "${inputId}" not found.`);
-                return;
-            }
-            updateRangeSliderPosition(rangeSliderSelector, inputElement.value, false);
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        });
+        function onHandleMove(event) {
+            if (!isDragging) return;
+            event.preventDefault(); // Prevent default touch scrolling behavior
 
-        slider.addEventListener('click', (event) => {
-            console.log(`Slider "${rangeSliderSelector}" clicked at position: (${event.clientX}, ${event.clientY})`);
+            // Determine the current position based on touch or mouse event
+            let clientX;
+            if (event.touches) {
+                clientX = event.touches[0].clientX;
+            } else {
+                clientX = event.clientX;
+            }
+
             const rect = slider.getBoundingClientRect();
-            const offsetX = event.clientX - rect.left;
+            const offsetX = clientX - rect.left;
             const percentage = (offsetX / slider.clientWidth) * 100;
 
             const wrapper = document.querySelector(`.${rangeSliderSelector}`);
@@ -251,34 +207,61 @@ document.addEventListener('DOMContentLoaded', function() {
             const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
             const value = Math.round(min + (percentage / 100) * (max - min));
 
-            console.log(`Calculated value from click: ${value}`);
             const inputElement = document.getElementById(inputId);
             if (inputElement) {
                 inputElement.isProgrammaticChange = true;
                 inputElement.value = value;
                 inputElement.isProgrammaticChange = false;
-                console.log(`Updated input "${inputId}" value to "${value}" from slider click.`);
-                setHandleText(rangeSliderSelector, inputId);
-            } else {
-                console.log(`Input element with ID "${inputId}" not found.`);
-            }
-        });
 
-        function onMouseMove(event) {
-            console.log(`Mouse move detected on "${rangeSliderSelector}".`);
-            setInputValue(rangeSliderSelector, inputId);
+                // Use requestAnimationFrame for smoother updates
+                requestAnimationFrame(() => {
+                    setHandleText(rangeSliderSelector, inputId);
+                });
+            }
         }
 
-        function onMouseUp(event) {
-            console.log(`Mouse up detected on "${rangeSliderSelector}". Removing mousemove and mouseup listeners.`);
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
+        function endHandleMovement() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onHandleMove);
+            document.removeEventListener('touchmove', onHandleMove);
+            document.removeEventListener('mouseup', endHandleMovement);
+            document.removeEventListener('touchend', endHandleMovement);
+        }
+
+        // Handle slider clicks for both mouse and touch events
+        slider.addEventListener('click', onSliderClick);
+        slider.addEventListener('touchstart', onSliderClick, { passive: false });
+
+        function onSliderClick(event) {
+            event.preventDefault();
+
+            let clientX;
+            if (event.touches) {
+                clientX = event.touches[0].clientX;
+            } else {
+                clientX = event.clientX;
+            }
+
+            const rect = slider.getBoundingClientRect();
+            const offsetX = clientX - rect.left;
+            const percentage = (offsetX / slider.clientWidth) * 100;
+
+            const wrapper = document.querySelector(`.${rangeSliderSelector}`);
+            const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
+            const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
+            const value = Math.round(min + (percentage / 100) * (max - min));
+
+            const inputElement = document.getElementById(inputId);
+            if (inputElement) {
+                inputElement.isProgrammaticChange = true;
+                inputElement.value = value;
+                inputElement.isProgrammaticChange = false;
+                setHandleText(rangeSliderSelector, inputId);
+            }
         }
     }
 
     // Initialize sliders and inputs
-    console.log('Initializing range sliders and input synchronization.');
-
     // Define the range slider selectors and corresponding input IDs
     const slidersAndInputs = [
         { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-5"]', input: 'weight-3-kfa' },
@@ -306,10 +289,8 @@ document.addEventListener('DOMContentLoaded', function() {
             fill.style.width = `0%`;
         }
 
-        // Now add event listeners without setting input values
+        // Now add event listeners
         addHandleMovementListener(selector, input);
         observeChanges(selector, input);
     });
-
-    console.log('Range sliders and input synchronization setup complete.');
 });
