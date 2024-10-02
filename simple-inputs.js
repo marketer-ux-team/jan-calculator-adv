@@ -68,6 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
         const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
+        const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
+        const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : null;
 
         // If value is empty, do not update the slider position
         if (value.trim() === '') {
@@ -85,7 +87,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Ensure the value stays within the range
-        const adjustedValue = Math.max(min, Math.min(numericValue, max));
+        let adjustedValue = Math.max(min, Math.min(numericValue, max));
+
+        // If stepSize exists, adjust the value to the nearest step
+        if (stepSize) {
+            adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
+        }
 
         // Calculate percentage relative to the slider's range
         const percentage = ((adjustedValue - min) / (max - min)) * 100;
@@ -103,6 +110,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
         handle.style.left = `${clampedPercentage}%`;
         fill.style.width = `${clampedPercentage}%`;
+
+        // Update handle text to show the adjusted value
+        const handleText = handle.querySelector('.inside-handle-text');
+        if (handleText) handleText.textContent = adjustedValue;
     }
 
     // Sync input field value with slider handle text
@@ -220,17 +231,40 @@ document.addEventListener('DOMContentLoaded', function() {
             const wrapper = document.querySelector(`.${rangeSliderSelector}`);
             const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
             const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
-            const value = Math.round(min + (percentage / 100) * (max - min));
+            const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
+            const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : null;
+
+            let numericValue = min + (percentage / 100) * (max - min);
+
+            // Ensure the value stays within the range
+            numericValue = Math.max(min, Math.min(numericValue, max));
+
+            // If stepSize exists, adjust the value to the nearest step
+            if (stepSize) {
+                numericValue = Math.round(numericValue / stepSize) * stepSize;
+            }
+
+            // Update the percentage based on adjusted value
+            const adjustedPercentage = ((numericValue - min) / (max - min)) * 100;
+
+            // Update handle and fill positions
+            const clampedPercentage = Math.min(Math.max(adjustedPercentage, 0), 100);
+            handle.style.left = `${clampedPercentage}%`;
+            fill.style.width = `${clampedPercentage}%`;
 
             const inputElement = document.getElementById(inputId);
             if (inputElement) {
                 inputElement.isProgrammaticChange = true;
-                inputElement.value = value;
+                inputElement.value = numericValue;
                 inputElement.isProgrammaticChange = false;
+
+                // Update handle text
+                const handleText = handle.querySelector('.inside-handle-text');
+                if (handleText) handleText.textContent = numericValue;
 
                 // Use requestAnimationFrame for smoother updates
                 requestAnimationFrame(() => {
-                    setHandleText(rangeSliderSelector, inputId, false); // Disable transition during drag
+                    handleInputChange();
                 });
             }
         }
@@ -264,14 +298,38 @@ document.addEventListener('DOMContentLoaded', function() {
             const wrapper = document.querySelector(`.${rangeSliderSelector}`);
             const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
             const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
-            const value = Math.round(min + (percentage / 100) * (max - min));
+            const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
+            const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : null;
+
+            let numericValue = min + (percentage / 100) * (max - min);
+
+            // Ensure the value stays within the range
+            numericValue = Math.max(min, Math.min(numericValue, max));
+
+            // If stepSize exists, adjust the value to the nearest step
+            if (stepSize) {
+                numericValue = Math.round(numericValue / stepSize) * stepSize;
+            }
+
+            // Update the percentage based on adjusted value
+            const adjustedPercentage = ((numericValue - min) / (max - min)) * 100;
+
+            // Update handle and fill positions
+            const clampedPercentage = Math.min(Math.max(adjustedPercentage, 0), 100);
+            handle.style.left = `${clampedPercentage}%`;
+            fill.style.width = `${clampedPercentage}%`;
 
             const inputElement = document.getElementById(inputId);
             if (inputElement) {
                 inputElement.isProgrammaticChange = true;
-                inputElement.value = value;
+                inputElement.value = numericValue;
                 inputElement.isProgrammaticChange = false;
-                setHandleText(rangeSliderSelector, inputId, true); // Enable transition for click events
+
+                // Update handle text
+                const handleText = handle.querySelector('.inside-handle-text');
+                if (handleText) handleText.textContent = numericValue;
+
+                handleInputChange();
             }
         }
     }
@@ -284,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { selector: 'wrapper-step-range_slider', input: 'age-2' },
         { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-2"]', input: 'height-2' },
         { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-3"]', input: 'weight-2' },
-        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]', input: 'steps-4' },
+        { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]', input: 'steps-4' }, // Steps slider
         { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-7"]', input: 'wunschgewicht' }
     ];
 
