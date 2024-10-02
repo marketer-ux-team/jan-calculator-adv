@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing input restrictions...');
     console.log('Allow Comma Fields:', allowCommaFields);
 
+    // Flag to indicate initialization phase
+    let isInitializing = true;
+
     // Restrict input based on whether commas are allowed
     numericInputs.forEach(input => {
         // Initialize the flag to prevent recursive input events
@@ -122,57 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Set handle left to ${handle.style.left} and fill width to ${fill.style.width}`);
     }
 
-    // Sync input field value with slider handle text
-    function setInputValue(rangeSliderSelector, inputId) {
-        console.log(`Setting input value for "${inputId}" based on slider "${rangeSliderSelector}"`);
-        const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
-        if (!handleText) {
-            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
-            return;
-        }
-
-        const inputElement = document.getElementById(inputId);
-        if (!inputElement) {
-            console.log(`Input element with ID "${inputId}" not found.`);
-            return;
-        }
-
-        // Use the flag to prevent the 'input' event listener from modifying the value
-        inputElement.isProgrammaticChange = true;
-        inputElement.value = handleText.textContent;
-        console.log(`Updated input "${inputId}" value to "${handleText.textContent}"`);
-        inputElement.isProgrammaticChange = false;
-        handleInputChange();
-    }
-
-    // Update handle text based on input value
-    function setHandleText(rangeSliderSelector, inputId) {
-        console.log(`Setting handle text for slider "${rangeSliderSelector}" based on input "${inputId}"`);
-        const inputElement = document.getElementById(inputId);
-        if (!inputElement) {
-            console.log(`Input element with ID "${inputId}" not found.`);
-            return;
-        }
-
-        const inputValue = inputElement.value;
-        const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
-        if (!handleText) {
-            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
-            return;
-        }
-
-        handleText.textContent = inputValue;
-        console.log(`Updated handle text to "${inputValue}"`);
-        updateRangeSliderPosition(rangeSliderSelector, inputValue, true);
-        handleInputChange();
-    }
-
-    // Function to handle input changes
-    function handleInputChange() {
-        console.log('Handling input changes.');
-        // Implement your logic here
-    }
-
     // Function to observe changes and sync input and slider
     function observeChanges(rangeSliderSelector, inputId) {
         console.log(`Setting up MutationObserver for "${inputId}" with slider "${rangeSliderSelector}"`);
@@ -187,6 +139,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const observer = new MutationObserver(() => {
             console.log(`MutationObserver detected a change in "${rangeSliderSelector}".`);
+
+            // Do not update input if initializing
+            if (isInitializing) {
+                console.log(`Initialization in progress. Skipping update for "${inputId}".`);
+                return;
+            }
 
             // Do not update input if input is empty and handle text is '0'
             if (inputElement.value === '' && handleTextElement.textContent === '0') {
@@ -221,6 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
             inputElement.isProgrammaticChange = false;
             updateRangeSliderPosition(rangeSliderSelector, inputElement.value, true);
         });
+    }
+
+    // Function to handle input changes
+    function handleInputChange() {
+        console.log('Handling input changes.');
+        // Implement your logic here
     }
 
     // Add listeners for slider handle movement
@@ -316,6 +280,9 @@ document.addEventListener('DOMContentLoaded', function() {
         addHandleMovementListener(selector, input);
         observeChanges(selector, input);
     });
+
+    // After initialization is complete, set isInitializing to false
+    isInitializing = false;
 
     console.log('Range sliders and input synchronization setup complete.');
 });
