@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
     });
 
     heightInput.addEventListener('input', () => {
-        height = parseInt(heightInput.value, 10) || 0;
+
         calculateResult();
     });
 
@@ -892,7 +892,7 @@ window.onload = function() {
         
             if (calculationMethod === 'miflin') {
                 var heightInput = document.getElementById('height-2');
-                var height = parseFloat(heightInput && heightInput.value) || 0;
+                var height = heightInput && !isNaN(parseFloat(heightInput.value)) ? parseFloat(heightInput.value) : null;
         
                 var optimalWeight = height - 100;
         
