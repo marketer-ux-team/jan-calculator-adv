@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () { //Stelle für Änderung //Ich füge was
+document.addEventListener('DOMContentLoaded', function () { //Stelle für Änderung //Ich füge
     // Select necessary DOM elements
 
     const genderInputs = document.querySelectorAll('input[name="geschlecht"]');
@@ -46,38 +46,37 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
 
     // Input change listeners for Miflin inputs
     ageInput.addEventListener('input', () => {
-        age = ageInput.value ? parseInt(ageInput.value, 10) : null;
+        age = parseInt(ageInput.value, 10) || 0;
 
         calculateResult();
     });
 
     heightInput.addEventListener('input', () => {
-        height = heightInput.value ? parseInt(heightInput.value, 10) : null;
+        height = parseInt(heightInput.value, 10) || 0;
         calculateResult();
     });
 
     weightInput.addEventListener('input', () => {
-        weight = weightInput.value ? parseInt(weightInput.value, 10) : null;
+        weight = parseInt(weightInput.value, 10) || 0;
         calculateResult();
     });
 
     // Input change listeners for KFA inputs
-weightKfaInput.addEventListener('input', () => {
-    weight = weightKfaInput.value ? parseInt(weightKfaInput.value, 10) : null;
-    calculateResult();
-});
+    weightKfaInput.addEventListener('input', () => {
+        weight = parseInt(weightKfaInput.value, 10) || 0;
+        calculateResult();
+    });
 
-kfaInput.addEventListener('input', () => {
-    kfa = kfaInput.value ? parseInt(kfaInput.value, 10) : null;
-    calculateResult();
-});
+    kfaInput.addEventListener('input', () => {
+        kfa = parseInt(kfaInput.value, 10) || 0;
+        calculateResult();
+    });
 
-// Input change listener for Steps input
-stepsInput.addEventListener('input', () => {
-    const stepsValue = stepsInput.value.replace(/\./g, '');
-    dailySteps = stepsValue ? parseInt(stepsValue, 10) : null; // Removing periods and converting to integer
-    calculateStepsCalories();
-});
+    // Input change listener for Steps input
+    stepsInput.addEventListener('input', () => {
+        dailySteps = parseInt(stepsInput.value.replace(/\./g, ''), 10) || 0; // Removing periods and converting to integer
+        calculateStepsCalories();
+    });
 
     // Function to toggle between Miflin and KFA input fields
     function toggleCalcType() {
