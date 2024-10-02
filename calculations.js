@@ -46,37 +46,38 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
 
     // Input change listeners for Miflin inputs
     ageInput.addEventListener('input', () => {
-        age = parseInt(ageInput.value, 10) || 0;
+        age = ageInput.value ? parseInt(ageInput.value, 10) : null;
 
         calculateResult();
     });
 
     heightInput.addEventListener('input', () => {
-        height = parseInt(heightInput.value, 10) || 0;
+        height = heightInput.value ? parseInt(heightInput.value, 10) : null;
         calculateResult();
     });
 
     weightInput.addEventListener('input', () => {
-        weight = parseInt(weightInput.value, 10) || 0;
+        weight = weightInput.value ? parseInt(weightInput.value, 10) : null;
         calculateResult();
     });
 
     // Input change listeners for KFA inputs
-    weightKfaInput.addEventListener('input', () => {
-        weight = parseInt(weightKfaInput.value, 10) || 0;
-        calculateResult();
-    });
+weightKfaInput.addEventListener('input', () => {
+    weight = weightKfaInput.value ? parseInt(weightKfaInput.value, 10) : null;
+    calculateResult();
+});
 
-    kfaInput.addEventListener('input', () => {
-        kfa = parseInt(kfaInput.value, 10) || 0;
-        calculateResult();
-    });
+kfaInput.addEventListener('input', () => {
+    kfa = kfaInput.value ? parseInt(kfaInput.value, 10) : null;
+    calculateResult();
+});
 
-    // Input change listener for Steps input
-    stepsInput.addEventListener('input', () => {
-        dailySteps = parseInt(stepsInput.value.replace(/\./g, ''), 10) || 0; // Removing periods and converting to integer
-        calculateStepsCalories();
-    });
+// Input change listener for Steps input
+stepsInput.addEventListener('input', () => {
+    const stepsValue = stepsInput.value.replace(/\./g, '');
+    dailySteps = stepsValue ? parseInt(stepsValue, 10) : null; // Removing periods and converting to integer
+    calculateStepsCalories();
+});
 
     // Function to toggle between Miflin and KFA input fields
     function toggleCalcType() {
