@@ -523,23 +523,32 @@ window.onload = function() {
         }
 
         // Function to handle live validation on slider changes using MutationObserver
-        function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
-            if (!sliderElement || !inputElement || !warningElement) return;
-            var handleTextElement = sliderElement.querySelector('.inside-handle-text');
-            if (handleTextElement) {
-                var observer = new MutationObserver(debounce(function() {
-                    var sliderValue = parseFloat(handleTextElement.textContent) || 0;
-                    inputElement.value = sliderValue;
-                    if (sliderValue > 0) {
-                        warningElement.style.display = 'none'; 
-                    }
-                    var event = createNewEvent('input');
-                    inputElement.dispatchEvent(event);
-                }, 100)); // Add 100ms debounce to avoid too many updates
-
-                observer.observe(handleTextElement, { childList: true, characterData: true, subtree: true });
+function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
+    if (!sliderElement || !inputElement || !warningElement) return;
+    
+    var handleTextElement = sliderElement.querySelector('.inside-handle-text');
+    
+    if (handleTextElement) {
+        var observer = new MutationObserver(debounce(function() {
+            // Check for a valid number and avoid defaulting to 0
+            var sliderValue = handleTextElement.textContent && !isNaN(parseFloat(handleTextElement.textContent)) 
+                              ? parseFloat(handleTextElement.textContent) 
+                              : null;
+            
+            inputElement.value = sliderValue !== null ? sliderValue : ''; // Set input to empty if no valid value
+            
+            if (sliderValue > 0) {
+                warningElement.style.display = 'none'; 
             }
-        }
+
+            var event = createNewEvent('input');
+            inputElement.dispatchEvent(event);
+        }, 100)); // Add 100ms debounce to avoid too many updates
+
+        observer.observe(handleTextElement, { childList: true, characterData: true, subtree: true });
+    }
+}
+
 
         // Attach validation to inputs and sliders
         function attachValidation(inputId, sliderSelector) {
