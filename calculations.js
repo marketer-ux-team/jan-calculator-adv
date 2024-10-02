@@ -603,6 +603,7 @@ window.onload = function() {
         attachValidation('weight-2', '.wrapper-step-range_slider[fs-rangeslider-element="wrapper-3"]');
         attachValidation('weight-3-kfa', '.wrapper-step-range_slider[fs-rangeslider-element="wrapper-5"]');
         attachValidation('kfa-2', '.wrapper-step-range_slider[fs-rangeslider-element="wrapper-6"]');
+        attachValidation('wunschgewicht', '.wrapper-step-range_slider[fs-rangeslider-element="wrapper-7"]');
 
         // Function to validate inputs and show warnings if any are missing or invalid
         var isBerechnenClicked = false;
