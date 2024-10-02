@@ -56,13 +56,11 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
     });
 
     weightInput.addEventListener('input', () => {
-        weight = parseInt(weightInput.value, 10) || 0;
         calculateResult();
     });
 
     // Input change listeners for KFA inputs
     weightKfaInput.addEventListener('input', () => {
-        weight = parseInt(weightKfaInput.value, 10) || 0;
         calculateResult();
     });
 
@@ -263,30 +261,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Function to observe changes in sliders and input fields
-    function observeWeightInputChange(wrapperClass, inputId) {
-        const handleTextElement = document.querySelector(`.${wrapperClass} .inside-handle-text`);
-        const inputElement = document.getElementById(inputId);
+function observeWeightInputChange(wrapperClass, inputId) {
+    const handleTextElement = document.querySelector(`.${wrapperClass} .inside-handle-text`);
+    const inputElement = document.getElementById(inputId);
 
-        // Observe changes in slider handle text
-        if (handleTextElement) {
-            const observer = new MutationObserver(() => {
-                const value = parseInt(handleTextElement.textContent, 10) || 0;
-                inputElement.value = value;
-                getWeightFromGrundumsatz(); // Trigger weight fetch
-                updateTotalCalories(); // Update total calories after weight change
-            });
-
-            observer.observe(handleTextElement, { childList: true });
-        }
-
-        // Add input event listener to handle manual input changes
-        inputElement.addEventListener('input', () => {
-            const value = parseInt(inputElement.value, 10) || 0;
-            handleTextElement.textContent = value;
-            getWeightFromGrundumsatz();
-            updateTotalCalories();
+    // Observe changes in slider handle text
+    if (handleTextElement) {
+        const observer = new MutationObserver(() => {
+            const textContent = handleTextElement.textContent.trim();
+            // Allow empty input and prevent setting 0 for invalid inputs
+            const value = textContent === '' || isNaN(parseInt(textContent, 10)) ? '' : parseInt(textContent, 10);
+            inputElement.value = value; // Update the input field with valid number or leave it blank
+            getWeightFromGrundumsatz(); // Trigger weight fetch
+            updateTotalCalories(); // Update total calories after weight change
         });
+
+        observer.observe(handleTextElement, { childList: true });
     }
+
+    // Add input event listener to handle manual input changes
+    inputElement.addEventListener('input', () => {
+        const inputValue = inputElement.value.trim();
+        // Allow empty input or update the slider handle with valid numbers only
+        const value = inputValue === '' || isNaN(parseInt(inputValue, 10)) ? '' : parseInt(inputValue, 10);
+        handleTextElement.textContent = value; // Update the handle text only if it's a valid number
+        getWeightFromGrundumsatz(); // Trigger weight fetch
+        updateTotalCalories(); // Update total calories after manual input change
+    });
+}
+
 
     // Attach the observer to weight sliders and inputs
     observeWeightInputChange('wrapper-step-range_slider[fs-rangeslider-element="wrapper-3"]', 'weight-2');  // Miflin weight slider
