@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
 
     if (dailySteps > 0) {
         stepsWrapperResult.style.display = 'flex';
-        stepsResultElement.textContent = `${Math.round(stepsCalories).toLocaleString('de-DE')} kcal`; // Format with comma for thousands
-        altagElement.textContent = `${Math.round(stepsCalories).toLocaleString('de-DE')} kcal`; // Update Alltagsbewegung
+        stepsResultElement.textContent = `${Math.round(stepsCalories)} kcal`; // No formatting, just rounding
+        altagElement.textContent = `${Math.round(stepsCalories)} kcal`; // Update Alltagsbewegung
     } else {
         stepsWrapperResult.style.display = 'none'; // Hide if steps are 0
         altagElement.textContent = '0 kcal'; // Reset Alltagsbewegung if steps are 0
