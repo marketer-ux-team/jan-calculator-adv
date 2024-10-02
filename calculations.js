@@ -570,20 +570,27 @@ window.onload = function() {
 
         if (ageHandleTextElement && ageInputElement) {
             var observer = new MutationObserver(debounce(function() {
-                var sliderValue = parseFloat(ageHandleTextElement.textContent) || 0;
-                ageInputElement.value = sliderValue;
-
-                // Hide the warning if the input is valid
-                if (sliderValue > 0 && ageWarningElement) {
-                    ageWarningElement.style.display = 'none';
+                // Check if the content of ageHandleTextElement is a valid number
+                if (ageHandleTextElement.textContent && !isNaN(ageHandleTextElement.textContent)) {
+                    var sliderValue = ageHandleTextElement.textContent;
+                    ageInputElement.value = sliderValue;
+        
+                    // Hide the warning if the input is valid
+                    if (sliderValue > 0 && ageWarningElement) {
+                        ageWarningElement.style.display = 'none';
+                    }
+        
+                    var event = createNewEvent('input');
+                    ageInputElement.dispatchEvent(event);
+                } else {
+                    // Do not set to 0 or update if it's not a valid number
+                    ageInputElement.value = ''; // Leave the input empty
                 }
-
-                var event = createNewEvent('input');
-                ageInputElement.dispatchEvent(event);
             }, 100)); // 100ms debounce
-
+        
             observer.observe(ageHandleTextElement, { childList: true, characterData: true, subtree: true });
         }
+        
 
         // Add live validation for Wunschgewicht (since it may not have a slider)
         var wunschgewichtInput = document.getElementById('wunschgewicht');
@@ -891,7 +898,7 @@ window.onload = function() {
         
                 // Get age and gender
                 var ageInput = document.getElementById('age-2');
-                var age = parseFloat(ageInput && ageInput.value) || 0;
+                var age = ageInput && !isNaN(parseFloat(ageInput.value)) ? parseFloat(ageInput.value) : null;
         
                 var gender = document.querySelector('input[name="geschlecht"]:checked')?.value;
                 var genderFactor = (gender === 'man') ? 5 : -161;
