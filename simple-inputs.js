@@ -291,22 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     slidersAndInputs.forEach(({ selector, input }) => {
-        // Set handle text to empty string
-        const handleText = document.querySelector(`.${selector} .inside-handle-text`);
-        if (handleText) {
-            handleText.textContent = '';
-        }
-
-        // Set handle position to minimum value
-        const wrapper = document.querySelector(`.${selector}`);
-        if (wrapper) {
-            const handle = wrapper.querySelector(".range-slider_handle");
-            const fill = wrapper.querySelector(".range-slider_fill");
-            handle.style.left = `0%`;
-            fill.style.width = `0%`;
-        }
-
-        // Now add event listeners without setting input values
+        setInputValue(selector, input);
         addHandleMovementListener(selector, input);
         observeChanges(selector, input);
     });
