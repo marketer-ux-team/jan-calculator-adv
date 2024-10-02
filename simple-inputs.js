@@ -9,13 +9,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Restrict input based on whether commas are allowed
     numericInputs.forEach(input => {
-        console.log(`Setting up input restrictions for: ${input.id}`);
+        // Initialize the flag to prevent recursive input events
+        input.isProgrammaticChange = false;
 
+        console.log(`Setting up input restrictions for: ${input.id}`);
         if (allowCommaFields.includes(input.id)) {
             console.log(`${input.id} is allowed to have commas and periods.`);
 
             // Allow numbers, commas, and periods for specific fields
             input.addEventListener('input', () => {
+                if (input.isProgrammaticChange) {
+                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
+                    return;
+                }
+
                 console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
                 const originalValue = input.value;
 
@@ -31,7 +38,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (originalValue !== sanitizedValue) {
                     console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
+                    // Update the flag to indicate a programmatic change
+                    input.isProgrammaticChange = true;
                     input.value = sanitizedValue;
+                    input.isProgrammaticChange = false;
                 }
 
                 // Convert commas to periods for processing by the slider
@@ -43,13 +53,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Allow only numbers for other fields
             input.addEventListener('input', () => {
+                if (input.isProgrammaticChange) {
+                    console.log(`Programmatic change detected on ${input.id}. Skipping input event.`);
+                    return;
+                }
+
                 console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
                 const originalValue = input.value;
                 const sanitizedValue = input.value.replace(/[^0-9]/g, '');
 
                 if (originalValue !== sanitizedValue) {
                     console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
+                    // Update the flag to indicate a programmatic change
+                    input.isProgrammaticChange = true;
                     input.value = sanitizedValue;
+                    input.isProgrammaticChange = false;
                 }
 
                 // Update the slider position even if the input is empty
@@ -102,12 +120,57 @@ document.addEventListener('DOMContentLoaded', function() {
         fill.style.width = `${clampedPercentage}%`;
 
         console.log(`Set handle left to ${handle.style.left} and fill width to ${fill.style.width}`);
+    }
 
-        // Update the handle text content
-        const handleText = wrapper.querySelector('.inside-handle-text');
-        if (handleText) {
-            handleText.textContent = adjustedValue.toString();
+    // Sync input field value with slider handle text
+    function setInputValue(rangeSliderSelector, inputId) {
+        console.log(`Setting input value for "${inputId}" based on slider "${rangeSliderSelector}"`);
+        const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
+        if (!handleText) {
+            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
+            return;
         }
+
+        const inputElement = document.getElementById(inputId);
+        if (!inputElement) {
+            console.log(`Input element with ID "${inputId}" not found.`);
+            return;
+        }
+
+        // Use the flag to prevent the 'input' event listener from modifying the value
+        inputElement.isProgrammaticChange = true;
+        inputElement.value = handleText.textContent;
+        console.log(`Updated input "${inputId}" value to "${handleText.textContent}"`);
+        inputElement.isProgrammaticChange = false;
+        handleInputChange();
+    }
+
+    // Update handle text based on input value
+    function setHandleText(rangeSliderSelector, inputId) {
+        console.log(`Setting handle text for slider "${rangeSliderSelector}" based on input "${inputId}"`);
+        const inputElement = document.getElementById(inputId);
+        if (!inputElement) {
+            console.log(`Input element with ID "${inputId}" not found.`);
+            return;
+        }
+
+        const inputValue = inputElement.value;
+        const handleText = document.querySelector(`.${rangeSliderSelector} .inside-handle-text`);
+        if (!handleText) {
+            console.log(`Handle text element not found for "${rangeSliderSelector}".`);
+            return;
+        }
+
+        handleText.textContent = inputValue;
+        console.log(`Updated handle text to "${inputValue}"`);
+        updateRangeSliderPosition(rangeSliderSelector, inputValue, true);
+        handleInputChange();
+    }
+
+    // Function to handle input changes
+    function handleInputChange() {
+        console.log('Handling input changes.');
+        // Implement your logic here
     }
 
     // Function to observe changes and sync input and slider
@@ -125,9 +188,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const observer = new MutationObserver(() => {
             console.log(`MutationObserver detected a change in "${rangeSliderSelector}".`);
 
-            // Update input value if it's different from handle text content
+            // Update input value regardless of whether handle text is empty
             if (inputElement.value !== handleTextElement.textContent) {
+                inputElement.isProgrammaticChange = true;
                 inputElement.value = handleTextElement.textContent;
+                inputElement.isProgrammaticChange = false;
                 handleInputChange();
             }
         });
@@ -135,18 +200,21 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(handleTextElement, { childList: true });
 
         inputElement.addEventListener('input', () => {
+            if (inputElement.isProgrammaticChange) {
+                console.log(`Programmatic change detected on "${inputId}". Skipping input event.`);
+                return;
+            }
+
             console.log(`Input event detected on "${inputId}". Value: "${inputElement.value}"`);
             
-            // Update handle text and slider position
+            // Allow updating handle text even if the input is empty
+            console.log(`Updating handle text for "${rangeSliderSelector}" to "${inputElement.value}"`);
+            // Use the flag to prevent recursive input event triggering
+            inputElement.isProgrammaticChange = true;
             handleTextElement.textContent = inputElement.value;
+            inputElement.isProgrammaticChange = false;
             updateRangeSliderPosition(rangeSliderSelector, inputElement.value, true);
         });
-    }
-
-    // Function to handle input changes
-    function handleInputChange() {
-        console.log('Handling input changes.');
-        // Implement your logic here, such as recalculations or updates
     }
 
     // Add listeners for slider handle movement
@@ -186,14 +254,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`Calculated value from click: ${value}`);
             const inputElement = document.getElementById(inputId);
             if (inputElement) {
+                inputElement.isProgrammaticChange = true;
                 inputElement.value = value;
+                inputElement.isProgrammaticChange = false;
                 console.log(`Updated input "${inputId}" value to "${value}" from slider click.`);
-                // Update handle text and slider position
-                const handleTextElement = wrapper.querySelector('.inside-handle-text');
-                if (handleTextElement) {
-                    handleTextElement.textContent = inputElement.value;
-                }
-                updateRangeSliderPosition(rangeSliderSelector, inputElement.value, true);
+                setHandleText(rangeSliderSelector, inputId);
             } else {
                 console.log(`Input element with ID "${inputId}" not found.`);
             }
@@ -208,17 +273,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`Mouse up detected on "${rangeSliderSelector}". Removing mousemove and mouseup listeners.`);
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
-        }
-    }
-
-    // Function to set input value based on slider handle text
-    function setInputValue(rangeSliderSelector, inputId) {
-        const wrapper = document.querySelector(`.${rangeSliderSelector}`);
-        const handleTextElement = wrapper.querySelector('.inside-handle-text');
-        const inputElement = document.getElementById(inputId);
-        if (handleTextElement && inputElement) {
-            inputElement.value = handleTextElement.textContent;
-            handleInputChange();
         }
     }
 
@@ -237,10 +291,22 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     slidersAndInputs.forEach(({ selector, input }) => {
-        // Initialize the input value based on the slider's start value
-        setInputValue(selector, input);
+        // Set handle text to empty string
+        const handleText = document.querySelector(`.${selector} .inside-handle-text`);
+        if (handleText) {
+            handleText.textContent = '';
+        }
 
-        // Add event listeners
+        // Set handle position to minimum value
+        const wrapper = document.querySelector(`.${selector}`);
+        if (wrapper) {
+            const handle = wrapper.querySelector(".range-slider_handle");
+            const fill = wrapper.querySelector(".range-slider_fill");
+            handle.style.left = `0%`;
+            fill.style.width = `0%`;
+        }
+
+        // Now add event listeners without setting input values
         addHandleMovementListener(selector, input);
         observeChanges(selector, input);
     });
