@@ -240,15 +240,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let weight = 0;
 
-    // Function to dynamically fetch the correct weight based on the selected calculation type (Miflin or KFA)
-    function getWeightFromGrundumsatz() {
-        const calcType = document.querySelector('input[name="kfa-or-miflin"]:checked').value;
-        if (calcType === 'miflin') {
-            weight = parseInt(document.getElementById('weight-2').value, 10) || 0;
-        } else {
-            weight = parseInt(document.getElementById('weight-3-kfa').value, 10) || 0;
-        }
+   // Function to dynamically fetch the correct weight based on the selected calculation type (Miflin or KFA)
+function getWeightFromGrundumsatz() {
+    const calcType = document.querySelector('input[name="kfa-or-miflin"]:checked').value;
+
+    if (calcType === 'miflin') {
+        weight = document.getElementById('weight-2').value && !isNaN(parseInt(document.getElementById('weight-2').value, 10)) 
+                 ? parseInt(document.getElementById('weight-2').value, 10) 
+                 : null;  // Set to null if invalid
+    } else {
+        weight = document.getElementById('weight-3-kfa').value && !isNaN(parseInt(document.getElementById('weight-3-kfa').value, 10)) 
+                 ? parseInt(document.getElementById('weight-3-kfa').value, 10) 
+                 : null;  // Set to null if invalid
     }
+}
+
 
     // Add event listener to toggle between Miflin and KFA
     const calcTypeInputs = document.querySelectorAll('input[name="kfa-or-miflin"]');
@@ -881,9 +887,13 @@ function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
             // Get the current weight based on the selected calculation method
             var currentWeight = 0;
             if (calculationMethod === 'miflin') {
-                currentWeight = parseFloat(weightInputElementMiflin && weightInputElementMiflin.value) || 0;
+                currentWeight = weightInputElementMiflin && !isNaN(parseFloat(weightInputElementMiflin.value)) 
+                                ? parseFloat(weightInputElementMiflin.value) 
+                                : null;  // Set to null if invalid
             } else if (calculationMethod === 'kfa') {
-                currentWeight = parseFloat(weightInputElementKfa && weightInputElementKfa.value) || 0;
+                currentWeight = weightInputElementKfa && !isNaN(parseFloat(weightInputElementKfa.value)) 
+                                ? parseFloat(weightInputElementKfa.value) 
+                                : null;  // Set to null if invalid
             }
         
             var targetWeight = parseFloat(targetWeightElement && targetWeightElement.value) || 0;
