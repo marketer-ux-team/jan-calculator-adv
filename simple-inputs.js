@@ -48,41 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const valueForSlider = sanitizedValue.replace(/,/g, '.');
                 updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
             });
-
-            input.addEventListener('keydown', (event) => {
-                console.log(`Keydown event on ${input.id}: key="${event.key}", keyCode=${event.keyCode}, ctrlKey=${event.ctrlKey}, metaKey=${event.metaKey}`);
-
-                // Allow certain keys such as backspace, delete, tab, etc.
-                const allowedKeys = [
-                    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-                    'Home', 'End', 'ArrowLeft', 'ArrowRight'
-                ];
-
-                if (allowedKeys.includes(event.key) ||
-                    (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
-                    console.log(`Allowed key "${event.key}" pressed on ${input.id}.`);
-                    return; // Allow the keypress
-                }
-
-                // Allow one comma and one period
-                if ((event.key === ',' && input.value.includes(',')) ||
-                    (event.key === '.' && input.value.includes('.'))) {
-                    console.log(`Preventing multiple "${event.key}" in ${input.id}.`);
-                    event.preventDefault();
-                    return;
-                }
-
-                // Ensure numeric input with commas or periods
-                const isNumberKey = 
-                    (!event.shiftKey && 
-                    ((event.keyCode >= 48 && event.keyCode <= 57) || // Top numbers
-                     (event.keyCode >= 96 && event.keyCode <= 105))); // Numpad numbers
-
-                if (!isNumberKey && event.key !== ',' && event.key !== '.') {
-                    console.log(`Preventing non-numeric key "${event.key}" on ${input.id}.`);
-                    event.preventDefault();
-                }
-            });
         } else {
             console.log(`${input.id} is restricted to numbers only.`);
 
@@ -104,33 +69,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     input.value = sanitizedValue;
                     input.isProgrammaticChange = false;
                 }
-            });
 
-            input.addEventListener('keydown', (event) => {
-                console.log(`Keydown event on ${input.id}: key="${event.key}", keyCode=${event.keyCode}, ctrlKey=${event.ctrlKey}, metaKey=${event.metaKey}`);
-
-                // Allow certain keys such as backspace, delete, tab, etc.
-                const allowedKeys = [
-                    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-                    'Home', 'End', 'ArrowLeft', 'ArrowRight'
-                ];
-
-                if (allowedKeys.includes(event.key) ||
-                    (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
-                    console.log(`Allowed key "${event.key}" pressed on ${input.id}.`);
-                    return; // Allow the keypress
-                }
-
-                // Ensure numeric input only for other fields
-                const isNumberKey = 
-                    (!event.shiftKey && 
-                    ((event.keyCode >= 48 && event.keyCode <= 57) || // Top numbers
-                     (event.keyCode >= 96 && event.keyCode <= 105))); // Numpad numbers
-
-                if (!isNumberKey) {
-                    console.log(`Preventing non-numeric key "${event.key}" on ${input.id}.`);
-                    event.preventDefault();
-                }
+                // Update the slider position even if the input is empty
+                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, sanitizedValue, true);
             });
         }
     });
@@ -153,12 +94,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Range slider min: ${min}, max: ${max}`);
 
         // Replace comma with period and parse the value
-        const numericValue = parseFloat(value.replace(',', '.'));
+        let numericValue = parseFloat(value.replace(',', '.'));
         console.log(`Parsed numeric value: ${numericValue}`);
 
         if (isNaN(numericValue)) {
             console.log(`Invalid numeric value for "${rangeSliderSelector}": "${value}"`);
-            return;
+            numericValue = min; // Set to minimum value when input is invalid
         }
 
         // Ensure the value stays within the range
@@ -247,8 +188,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const observer = new MutationObserver(() => {
             console.log(`MutationObserver detected a change in "${rangeSliderSelector}".`);
 
-            // Only update input if handle text is not empty and different from input value
-            if (handleTextElement.textContent !== "" && inputElement.value !== handleTextElement.textContent) {
+            // Update input value regardless of whether handle text is empty
+            if (inputElement.value !== handleTextElement.textContent) {
                 inputElement.isProgrammaticChange = true;
                 inputElement.value = handleTextElement.textContent;
                 inputElement.isProgrammaticChange = false;
@@ -266,20 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log(`Input event detected on "${inputId}". Value: "${inputElement.value}"`);
             
-            // Do not update handle text if the input is empty
-            if (inputElement.value.trim() === "") {
-                console.log(`Input is empty for "${inputId}". No changes made.`);
-                return;
-            }
-
-            if (inputElement.value !== handleTextElement.textContent) {
-                console.log(`Updating handle text for "${rangeSliderSelector}" to "${inputElement.value}"`);
-                // Use the flag to prevent recursive input event triggering
-                inputElement.isProgrammaticChange = true;
-                handleTextElement.textContent = inputElement.value;
-                inputElement.isProgrammaticChange = false;
-                updateRangeSliderPosition(rangeSliderSelector, inputElement.value, true);
-            }
+            // Allow updating handle text even if the input is empty
+            console.log(`Updating handle text for "${rangeSliderSelector}" to "${inputElement.value}"`);
+            // Use the flag to prevent recursive input event triggering
+            inputElement.isProgrammaticChange = true;
+            handleTextElement.textContent = inputElement.value;
+            inputElement.isProgrammaticChange = false;
+            updateRangeSliderPosition(rangeSliderSelector, inputElement.value, true);
         });
     }
 
