@@ -318,6 +318,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update handle and fill positions
             const clampedPercentage = Math.min(Math.max(adjustedPercentage, 0), 100);
+            const fill = wrapper.querySelector(".range-slider_fill");
+
             handle.style.left = `${clampedPercentage}%`;
             fill.style.width = `${clampedPercentage}%`;
 
