@@ -17,154 +17,94 @@ function debounce(func, delay) {
     };
 }
 
-// Restrict input based on whether commas are allowed
+
 numericInputs.forEach(input => {
-    // Initialize the flag to prevent recursive input events
-    input.isProgrammaticChange = false;
+    input.addEventListener('input', debounce(() => {
+        if (input.isProgrammaticChange) return;
 
-    console.log(`Setting up input restrictions for: ${input.id}`);
-    if (allowCommaFields.includes(input.id)) {
-        console.log(`${input.id} is allowed to have commas and periods.`);
+        const originalValue = input.value;
+        console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
 
-        // Allow numbers, commas, and periods for specific fields
-        input.addEventListener('input', debounce(() => {
-            if (input.isProgrammaticChange) return;
+        // Allow empty value without forcing it to "0"
+        if (originalValue === "") {
+            console.log(`Empty value detected for ${input.id}. Allowing empty value.`);
+            return;
+        }
 
-            console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
-            const originalValue = input.value;
+        // Sanitization logic for specific fields (commas and periods)
+        let sanitizedValue = originalValue.replace(/[^0-9,\.]/g, '')
+                                          .replace(/,{2,}/g, ',')
+                                          .replace(/\.{2,}/g, '.')
+                                          .replace(/,\./g, '.')
+                                          .replace(/\.,/g, ',')
+                                          .replace(/^[,\.]+/g, ''); // Remove leading commas or periods
 
-            // Replace any character that is not a digit, comma, or period
-            let sanitizedValue = originalValue.replace(/[^0-9,\.]/g, '')
-                                              .replace(/,{2,}/g, ',')  // Replace multiple commas with a single comma
-                                              .replace(/\.{2,}/g, '.') // Replace multiple periods with a single period
-                                              .replace(/,\./g, '.')    // Replace comma followed by period with period
-                                              .replace(/\.,/g, ',');    // Replace period followed by comma with comma
+        // If sanitized value differs from original, update the input
+        if (originalValue !== sanitizedValue) {
+            input.isProgrammaticChange = true;
+            input.value = sanitizedValue;
+            input.isProgrammaticChange = false;
+        }
 
-            // Remove leading commas or periods
-            sanitizedValue = sanitizedValue.replace(/^[,\.]+/g, '');
-
-            if (originalValue !== sanitizedValue) {
-                console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
-                input.isProgrammaticChange = true;
-                input.value = sanitizedValue;
-                input.isProgrammaticChange = false;
-            }
-
-            // Convert commas to periods for slider processing
-            const valueForSlider = sanitizedValue.replace(/,/g, '.');
-            updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
-        }, 300)); // Debounce with a 300ms delay
-
-        // Keydown event for handling input restrictions
-        input.addEventListener('keydown', (event) => {
-            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
-            if (allowedKeys.includes(event.key) || (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
-                return; // Allow common control keys
-            }
-
-            // Prevent multiple commas or periods
-            if ((event.key === ',' && input.value.includes(',')) || (event.key === '.' && input.value.includes('.'))) {
-                event.preventDefault();
-                return;
-            }
-
-            // Allow only numbers, commas, or periods
-            const isNumberKey = (!event.shiftKey && ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105))); // Numeric keys
-            if (!isNumberKey && event.key !== ',' && event.key !== '.') {
-                event.preventDefault();
-            }
-        });
-
-    } else {
-        console.log(`${input.id} is restricted to numbers only.`);
-
-        // Allow only numbers for other fields
-        input.addEventListener('input', debounce(() => {
-            if (input.isProgrammaticChange) return;
-
-            console.log(`Input event triggered on ${input.id}. Current value: "${input.value}"`);
-            const originalValue = input.value;
-            const sanitizedValue = originalValue.replace(/[^0-9]/g, '');
-
-            if (originalValue !== sanitizedValue) {
-                console.log(`Sanitized value for ${input.id}: "${sanitizedValue}"`);
-                input.isProgrammaticChange = true;
-                input.value = sanitizedValue;
-                input.isProgrammaticChange = false;
-            }
-        }, 300)); // Debounce with a 300ms delay
-
-        // Keydown event for handling numeric input
-        input.addEventListener('keydown', (event) => {
-            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
-            if (allowedKeys.includes(event.key) || (['a', 'c', 'v', 'x'].includes(event.key.toLowerCase()) && (event.ctrlKey || event.metaKey))) {
-                return; // Allow control keys
-            }
-
-            // Allow only numbers
-            const isNumberKey = (!event.shiftKey && ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)));
-            if (!isNumberKey) {
-                event.preventDefault();
-            }
-        });
-    }
+        // Convert commas to periods for slider processing
+        const valueForSlider = sanitizedValue.replace(/,/g, '.');
+        updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
+    }, 300)); // Debounce with a 300ms delay
 });
 
 
-    // Function to update range slider position and value for weight and KFA
-    function updateRangeSliderPosition(rangeSliderWrapperClass, value, withTransition) {
-        console.log(`Updating range slider position for "${rangeSliderWrapperClass}" with value: ${value}, transition: ${withTransition}`);
-        const wrapper = document.querySelector(`.${rangeSliderWrapperClass}`);
-        if (!wrapper) {
-            console.log(`Wrapper with class "${rangeSliderWrapperClass}" not found.`);
-            return;
-        }
 
-        const handle = wrapper.querySelector(".range-slider_handle");
-        const fill = wrapper.querySelector(".range-slider_fill");
-
-        const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
-        const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
-
-        console.log(`Range slider min: ${min}, max: ${max}`);
-
-        let stepSize = 1;
-        if (wrapper.getAttribute("fs-rangeslider-element") === 'wrapper-4') {
-            const totalSteps = 500;
-            stepSize = (max - min) / totalSteps;
-            console.log(`Special case for "wrapper-4": Total steps = ${totalSteps}, step size = ${stepSize}`);
-        } else {
-            console.log(`Normal step size of 1 applied.`);
-        }
-
-        // Remove commas and periods for numerical processing
-        const numericValue = parseFloat(value.replace(/,/g, '.'));
-        console.log(`Parsed numeric value: ${numericValue}`);
-
-        if (isNaN(numericValue)) {
-            console.log(`Invalid numeric value for "${rangeSliderWrapperClass}": "${value}"`);
-            return;
-        }
-
-        // Ensure the value stays within the range
-        const adjustedValue = Math.max(min, Math.min(numericValue, max));
-        console.log(`Adjusted value within range: ${adjustedValue}`);
-
-        // Calculate percentage relative to the slider's range
-        const percentage = ((adjustedValue - min) / (max - min)) * 100;
-        console.log(`Calculated percentage: ${percentage}%`);
-
-        // Apply transition if needed
-        handle.style.transition = withTransition ? 'left 0.3s ease' : 'none';
-        fill.style.transition = withTransition ? 'width 0.3s ease' : 'none';
-
-        // Set handle and fill to a max of 100% and a min of 0%
-        const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
-        handle.style.left = `${clampedPercentage}%`;
-        fill.style.width = `${clampedPercentage}%`;
-
-        console.log(`Set handle left to ${handle.style.left} and fill width to ${fill.style.width}`);
+// Function to update range slider position and value for weight and KFA
+function updateRangeSliderPosition(rangeSliderWrapperClass, value, withTransition) {
+    console.log(`Updating range slider position for "${rangeSliderWrapperClass}" with value: ${value}, transition: ${withTransition}`);
+    const wrapper = document.querySelector(`.${rangeSliderWrapperClass}`);
+    if (!wrapper) {
+        console.log(`Wrapper with class "${rangeSliderWrapperClass}" not found.`);
+        return;
     }
+
+    const handle = wrapper.querySelector(".range-slider_handle");
+    const fill = wrapper.querySelector(".range-slider_fill");
+
+    const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
+    const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
+
+    console.log(`Range slider min: ${min}, max: ${max}`);
+
+    // Remove commas and periods for numerical processing
+    const numericValue = parseFloat(value.replace(/,/g, '.'));
+    console.log(`Parsed numeric value: ${numericValue}`);
+
+    if (isNaN(numericValue)) {
+        console.log(`Invalid numeric value for "${rangeSliderWrapperClass}": "${value}"`);
+        return;
+    }
+
+    // Ensure the value stays within the range
+    const adjustedValue = Math.max(min, Math.min(numericValue, max));
+    console.log(`Adjusted value within range: ${adjustedValue}`);
+
+    // Calculate percentage relative to the slider's range
+    const percentage = ((adjustedValue - min) / (max - min)) * 100;
+    console.log(`Calculated percentage: ${percentage}%`);
+
+    // Apply transition if needed
+    if (withTransition) {
+        handle.style.transition = 'left 0.3s ease';
+        fill.style.transition = 'width 0.3s ease';
+    } else {
+        handle.style.transition = 'none';
+        fill.style.transition = 'none';
+    }
+
+    // Set handle and fill to a max of 100% and a min of 0%
+    const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+    handle.style.left = `${clampedPercentage}%`;
+    fill.style.width = `${clampedPercentage}%`;
+
+    console.log(`Set handle left to ${handle.style.left} and fill width to ${fill.style.width}`);
+}
+    
 
 
     // Sync input field value with slider handle text for weight and KFA
