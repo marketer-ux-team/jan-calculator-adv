@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
 
     // Input change listeners for Miflin inputs
     ageInput.addEventListener('input', () => {
-        age = parseInt(ageInput.value, 10) || 0;
 
         calculateResult();
     });
