@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () { //Stelle für Änderung
+document.addEventListener('DOMContentLoaded', function () { //Stelle für Änderung //Ich füge was hinzu
     // Select necessary DOM elements
 
     const genderInputs = document.querySelectorAll('input[name="geschlecht"]');
