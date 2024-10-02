@@ -188,7 +188,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const observer = new MutationObserver(() => {
             console.log(`MutationObserver detected a change in "${rangeSliderSelector}".`);
 
-            // Update input value regardless of whether handle text is empty
+            // Do not update input if input is empty and handle text is '0'
+            if (inputElement.value === '' && handleTextElement.textContent === '0') {
+                console.log(`Ignoring update to '0' for input "${inputId}" because input is empty and handle text is '0'`);
+                return;
+            }
+
+            // Update input value if it's different from handle text content
             if (inputElement.value !== handleTextElement.textContent) {
                 inputElement.isProgrammaticChange = true;
                 inputElement.value = handleTextElement.textContent;
@@ -291,7 +297,22 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     slidersAndInputs.forEach(({ selector, input }) => {
-        setInputValue(selector, input);
+        // Set handle text to empty string
+        const handleText = document.querySelector(`.${selector} .inside-handle-text`);
+        if (handleText) {
+            handleText.textContent = '';
+        }
+
+        // Set handle position to minimum value
+        const wrapper = document.querySelector(`.${selector}`);
+        if (wrapper) {
+            const handle = wrapper.querySelector(".range-slider_handle");
+            const fill = wrapper.querySelector(".range-slider_fill");
+            handle.style.left = `0%`;
+            fill.style.width = `0%`;
+        }
+
+        // Now add event listeners without setting input values
         addHandleMovementListener(selector, input);
         observeChanges(selector, input);
     });
