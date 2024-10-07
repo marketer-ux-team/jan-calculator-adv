@@ -119,20 +119,21 @@ document.addEventListener('DOMContentLoaded', function() {
             numericValue = min;
         }
 
-        // Ensure the value stays within the range
-        let adjustedValue = Math.max(min, Math.min(numericValue, max));
-        console.log('Adjusted value within range:', adjustedValue);
+        // For handle position and fill percentage, clamp the value between min and max
+        let clampedValue = Math.max(min, Math.min(numericValue, max));
+
+        console.log('Clamped value within range:', clampedValue);
 
         // Only snap to stepSize when the slider handle is being used, not manual input
         if (!stepFromInput && stepSize) {
-            adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
-            console.log('Value snapped to nearest step:', adjustedValue);
+            clampedValue = Math.round(clampedValue / stepSize) * stepSize;
+            console.log('Value snapped to nearest step:', clampedValue);
         } else {
             console.log('Skipping snapping to step since this is from manual input.');
         }
 
         // Calculate percentage relative to the slider's range
-        const percentage = ((adjustedValue - min) / (max - min)) * 100;
+        const percentage = ((clampedValue - min) / (max - min)) * 100;
         const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
 
         console.log('Slider percentage:', clampedPercentage);
@@ -149,11 +150,11 @@ document.addEventListener('DOMContentLoaded', function() {
         handle.style.left = `${clampedPercentage}%`;
         fill.style.width = `${clampedPercentage}%`;
 
-        // Update handle text to show the adjusted value
+        // Update handle text to show the actual numeric value (even if over max)
         const handleText = handle.querySelector('.inside-handle-text');
         if (handleText) {
-            handleText.textContent = adjustedValue;
-            console.log('Updated handle text:', adjustedValue);
+            handleText.textContent = numericValue;
+            console.log('Updated handle text:', numericValue);
         }
     }
 
@@ -377,12 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 handleInputChange();
             }
         }
-    }
-
-    // Set fs-rangeslider-step attribute to "1" for the steps-4 slider
-    const steps4Wrapper = document.querySelector('.wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]');
-    if (steps4Wrapper) {
-        steps4Wrapper.setAttribute('fs-rangeslider-step', '1');
     }
 
     // Initialize sliders and inputs
