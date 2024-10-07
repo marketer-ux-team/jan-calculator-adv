@@ -194,38 +194,54 @@ document.addEventListener('DOMContentLoaded', function () { //Stelle für Änder
         observeSliderChange('wrapper-step-range_slider[fs-rangeslider-element="wrapper-7"]', 'wunschgewicht');
     }
 
-    // Function to observe slider changes
-    function observeSliderChange(wrapperClass, inputId) {
-        const handleTextElement = document.querySelector(`.${wrapperClass} .inside-handle-text`);
-        const inputElement = document.getElementById(inputId);
+// Function to observe slider changes
+function observeSliderChange(wrapperClass, inputId) {
+    const handleTextElement = document.querySelector(`.${wrapperClass} .inside-handle-text`);
+    const inputElement = document.getElementById(inputId);
 
+    if (!handleTextElement || !inputElement) return;
 
-        // Observe changes in slider handle text
-        const observer = new MutationObserver(() => {
-            const value = handleTextElement.textContent;
+    let isUpdatingFromSlider = false; // Flag to prevent recursive updates
+
+    // Observe changes in slider handle text
+    const observer = new MutationObserver(() => {
+        if (isUpdatingFromSlider) return;
+
+        // Update input value to match handle text
+        const value = handleTextElement.textContent.trim();
+        if (value !== '') {
             inputElement.value = value;
-
             if (inputId === 'steps-4') {
                 dailySteps = parseInt(value, 10);
                 calculateStepsCalories();
             } else {
                 calculateResult(); // Trigger result calculation when the slider handle moves
             }
-        });
+        }
+    });
 
-        observer.observe(handleTextElement, { childList: true });
+    observer.observe(handleTextElement, { childList: true });
 
-        // Also listen to direct input changes
-        inputElement.addEventListener('input', () => {
-            handleTextElement.textContent = inputElement.value;
-            if (inputId === 'steps-4') {
-                dailySteps = parseInt(inputElement.value, 10);
-                calculateStepsCalories();
-            } else {
-                calculateResult();
-            }
-        });
-    }
+    // Also listen to direct input changes
+    inputElement.addEventListener('input', () => {
+        // Update the handle text when the input changes manually
+        const value = inputElement.value.trim();
+        if (!isNaN(parseInt(value, 10))) {
+            isUpdatingFromSlider = true; // Set the flag before updating handle
+            handleTextElement.textContent = value;
+            isUpdatingFromSlider = false; // Reset the flag
+        }
+
+        // Update calculations accordingly
+        if (inputId === 'steps-4') {
+            dailySteps = parseInt(value, 10);
+            calculateStepsCalories();
+        } else {
+            calculateResult();
+        }
+    });
+}
+   
 
     // Initial setup
     toggleCalcType();
