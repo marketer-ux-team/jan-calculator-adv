@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 // Update the slider position even if the input is empty
-                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, sanitizedValue, true);
+                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, sanitizedValue, true, true); // Added true here for no snapping
             });
         }
     });
