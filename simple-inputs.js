@@ -88,77 +88,77 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-// Function to update range slider position and value
-// Function to update range slider position and value
-function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, stepFromInput = false) {
-    const wrapper = document.querySelector(`.${rangeSliderSelector}`);
-    if (!wrapper) return;
 
-    const handle = wrapper.querySelector(".range-slider_handle");
-    const fill = wrapper.querySelector(".range-slider_fill");
-
-    const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
-    const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
-    const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
-    const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : 500; // Default step size for the slider is 500
-
-    console.log('Initial value:', value);
-
-    // If value is empty, do not update the slider position
-    if (value.trim() === '') {
+    function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, stepFromInput = false) {
+        const wrapper = document.querySelector(`.${rangeSliderSelector}`);
+        if (!wrapper) return;
+    
+        const handle = wrapper.querySelector(".range-slider_handle");
+        const fill = wrapper.querySelector(".range-slider_fill");
+    
+        const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
+        const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
+        const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
+        const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : 500; // Default step size for the slider is 500
+    
+        console.log('Initial value:', value);
+    
+        // If value is empty, do not update the slider position
+        if (value.trim() === '') {
+            const handleText = handle.querySelector('.inside-handle-text');
+            if (handleText) handleText.textContent = '';
+            console.log('Value is empty, skipping slider update.');
+            return;
+        }
+    
+        // Replace comma with period and parse the value
+        let numericValue = parseFloat(value.replace(',', '.'));
+    
+        console.log('Parsed numeric value:', numericValue);
+    
+        if (isNaN(numericValue)) {
+            console.log('Value is NaN, setting to minimum:', min);
+            numericValue = min;
+        }
+    
+        // Ensure the value stays within the range
+        let adjustedValue = Math.max(min, Math.min(numericValue, max));
+        console.log('Adjusted value within range:', adjustedValue);
+    
+        // Only snap to stepSize when the slider handle is being used, not manual input
+        if (!stepFromInput && stepSize) {
+            adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
+            console.log('Value snapped to nearest step:', adjustedValue);
+        } else {
+            console.log('Skipping snapping to step since this is from manual input.');
+        }
+    
+        // Calculate percentage relative to the slider's range
+        const percentage = ((adjustedValue - min) / (max - min)) * 100;
+        const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+    
+        console.log('Slider percentage:', clampedPercentage);
+    
+        // Apply transition if needed
+        if (withTransition) {
+            handle.style.transition = 'left 0.0s ease';
+            fill.style.transition = 'width 0.0s ease';
+        } else {
+            handle.style.transition = 'none';
+            fill.style.transition = 'none';
+        }
+    
+        handle.style.left = `${clampedPercentage}%`;
+        fill.style.width = `${clampedPercentage}%`;
+    
+        // Update handle text to show the adjusted value
         const handleText = handle.querySelector('.inside-handle-text');
-        if (handleText) handleText.textContent = '';
-        console.log('Value is empty, skipping slider update.');
-        return;
+        if (handleText) {
+            handleText.textContent = adjustedValue;
+            console.log('Updated handle text:', adjustedValue);
+        }
     }
-
-    // Replace comma with period and parse the value
-    let numericValue = parseFloat(value.replace(',', '.'));
-
-    console.log('Parsed numeric value:', numericValue);
-
-    if (isNaN(numericValue)) {
-        console.log('Value is NaN, setting to minimum:', min);
-        numericValue = min;
-    }
-
-    // Ensure the value stays within the range
-    let adjustedValue = Math.max(min, Math.min(numericValue, max));
-    console.log('Adjusted value within range:', adjustedValue);
-
-    // Only snap to stepSize when the slider handle is being used, not manual input
-    if (!stepFromInput && stepSize) {
-        adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
-        console.log('Value snapped to nearest step:', adjustedValue);
-    } else {
-        console.log('Skipping snapping to step since this is from manual input.');
-    }
-
-    // Calculate percentage relative to the slider's range
-    const percentage = ((adjustedValue - min) / (max - min)) * 100;
-    const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
-
-    console.log('Slider percentage:', clampedPercentage);
-
-    // Apply transition if needed
-    if (withTransition) {
-        handle.style.transition = 'left 0.0s ease';
-        fill.style.transition = 'width 0.0s ease';
-    } else {
-        handle.style.transition = 'none';
-        fill.style.transition = 'none';
-    }
-
-    handle.style.left = `${clampedPercentage}%`;
-    fill.style.width = `${clampedPercentage}%`;
-
-    // Update handle text to show the adjusted value
-    const handleText = handle.querySelector('.inside-handle-text');
-    if (handleText) {
-        handleText.textContent = adjustedValue;
-        console.log('Updated handle text:', adjustedValue);
-    }
-}    
+    
 
     // Sync input field value with slider handle text
     function setInputValue(rangeSliderSelector, inputId) {
