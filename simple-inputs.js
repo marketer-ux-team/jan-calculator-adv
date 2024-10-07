@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Convert commas to periods for processing by the slider
                 const valueForSlider = sanitizedValue.replace(/,/g, '.');
-                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
+                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true, true); // Added true here
             });
         } else {
             // Allow only numbers for other fields
