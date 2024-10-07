@@ -71,7 +71,6 @@ function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, s
     const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
     const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : 500; // Default step size for the slider is 500
 
-    // Log initial input value
     console.log('Initial value:', value);
 
     // If value is empty, do not update the slider position
@@ -96,10 +95,12 @@ function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, s
     let adjustedValue = Math.max(min, Math.min(numericValue, max));
     console.log('Adjusted value within range:', adjustedValue);
 
-    // If this update is from input (manual) and not slider, don't snap to stepSize
+    // Only snap to stepSize when the handle is being used (not manual input)
     if (!stepFromInput && stepSize) {
         adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
         console.log('Value snapped to nearest step:', adjustedValue);
+    } else {
+        console.log('Skipping snapping to step since this is from manual input.');
     }
 
     // Calculate percentage relative to the slider's range
@@ -127,6 +128,7 @@ function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, s
         console.log('Updated handle text:', adjustedValue);
     }
 }
+
    
     
 
