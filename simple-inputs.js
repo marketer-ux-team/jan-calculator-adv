@@ -69,11 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
         const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
         const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
-        const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : null;
+        const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : 500; // Default step size for the slider is 500
 
         // If value is empty, do not update the slider position
         if (value.trim() === '') {
-            // Optionally, clear the handle text
             const handleText = handle.querySelector('.inside-handle-text');
             if (handleText) handleText.textContent = '';
             return;
@@ -83,11 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let numericValue = parseFloat(value.replace(',', '.'));
 
         if (isNaN(numericValue)) {
-            numericValue = min; // Set to minimum value when input is invalid
+            numericValue = min;
         }
 
         // Ensure the value stays within the range
-        let adjustedValue = Math.max(min, Math.min(numericValue, max));
+        let adjustedValue = Math.max(min, numericValue);
 
         // If stepSize exists, adjust the value to the nearest step
         if (stepSize) {
@@ -96,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Calculate percentage relative to the slider's range
         const percentage = ((adjustedValue - min) / (max - min)) * 100;
+        const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
 
         // Apply transition if needed
         if (withTransition) {
@@ -106,8 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fill.style.transition = 'none';
         }
 
-        // Set handle and fill to a max of 100% and a min of 0%
-        const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
         handle.style.left = `${clampedPercentage}%`;
         fill.style.width = `${clampedPercentage}%`;
 
@@ -339,7 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize sliders and inputs
-    // Define the range slider selectors and corresponding input IDs
     const slidersAndInputs = [
         { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-5"]', input: 'weight-3-kfa' },
         { selector: 'wrapper-step-range_slider[fs-rangeslider-element="wrapper-6"]', input: 'kfa-2' },
