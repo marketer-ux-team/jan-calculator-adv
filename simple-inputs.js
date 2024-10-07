@@ -4,36 +4,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // List of input IDs that should allow commas
     const allowCommaFields = ['wunschgewicht', 'weight-2', 'weight-3-kfa'];
 
-    // Restrict input based on whether commas are allowed
     numericInputs.forEach(input => {
         // Initialize the flag to prevent recursive input events
         input.isProgrammaticChange = false;
 
+        // Allow numbers, commas, and periods for specific fields
         if (allowCommaFields.includes(input.id)) {
-            // Allow numbers, commas, and periods for specific fields
             input.addEventListener('input', () => {
                 if (input.isProgrammaticChange) return;
 
                 const originalValue = input.value;
-
-                // Replace any character that is not a digit, comma, or period
-                let sanitizedValue = input.value.replace(/[^0-9,\.]/g, '')
-                                               .replace(/,{2,}/g, ',') // Replace multiple commas with single comma
-                                               .replace(/\.{2,}/g, '.') // Replace multiple periods with single period
-                                               .replace(/,\./g, '.') // Replace comma followed by period with period
-                                               .replace(/\.,/g, ','); // Replace period followed by comma with comma
-
-                // Remove only leading commas or periods
-                sanitizedValue = sanitizedValue.replace(/^[,\.]+/g, '');
+                let sanitizedValue = originalValue.replace(/[^0-9,\.]/g, '');
 
                 if (originalValue !== sanitizedValue) {
-                    // Update the flag to indicate a programmatic change
                     input.isProgrammaticChange = true;
                     input.value = sanitizedValue;
                     input.isProgrammaticChange = false;
                 }
 
-                // Convert commas to periods for processing by the slider
+                // Convert commas to periods for slider handling
                 const valueForSlider = sanitizedValue.replace(/,/g, '.');
                 updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true);
             });
@@ -46,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const sanitizedValue = input.value.replace(/[^0-9]/g, '');
 
                 if (originalValue !== sanitizedValue) {
-                    // Update the flag to indicate a programmatic change
                     input.isProgrammaticChange = true;
                     input.value = sanitizedValue;
                     input.isProgrammaticChange = false;
@@ -58,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Function to update range slider position and value
     function updateRangeSliderPosition(rangeSliderSelector, value, withTransition) {
         const wrapper = document.querySelector(`.${rangeSliderSelector}`);
         if (!wrapper) return;
@@ -69,35 +56,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const min = parseFloat(wrapper.getAttribute("fs-rangeslider-min"));
         const max = parseFloat(wrapper.getAttribute("fs-rangeslider-max"));
         const stepSizeAttr = wrapper.getAttribute('fs-rangeslider-step');
-        const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : 500; // Default step size for the slider is 500
+        const stepSize = stepSizeAttr ? parseFloat(stepSizeAttr) : 500;
 
-        // If value is empty, do not update the slider position
         if (value.trim() === '') {
             const handleText = handle.querySelector('.inside-handle-text');
             if (handleText) handleText.textContent = '';
             return;
         }
 
-        // Replace comma with period and parse the value
         let numericValue = parseFloat(value.replace(',', '.'));
 
         if (isNaN(numericValue)) {
             numericValue = min;
         }
 
-        // Ensure the value stays within the range
-        let adjustedValue = Math.max(min, numericValue);
+        let adjustedValue = Math.max(min, Math.min(numericValue, max));
 
-        // If stepSize exists, adjust the value to the nearest step
+        // Round only for slider position updates, keep input value as-is
         if (stepSize) {
             adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
         }
 
-        // Calculate percentage relative to the slider's range
         const percentage = ((adjustedValue - min) / (max - min)) * 100;
         const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
 
-        // Apply transition if needed
         if (withTransition) {
             handle.style.transition = 'left 0.0s ease';
             fill.style.transition = 'width 0.0s ease';
@@ -109,10 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
         handle.style.left = `${clampedPercentage}%`;
         fill.style.width = `${clampedPercentage}%`;
 
-        // Update handle text to show the adjusted value
         const handleText = handle.querySelector('.inside-handle-text');
         if (handleText) handleText.textContent = adjustedValue;
     }
+
 
     // Sync input field value with slider handle text
     function setInputValue(rangeSliderSelector, inputId) {
