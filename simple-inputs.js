@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 // Function to update range slider position and value
+// Function to update range slider position and value
 function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, stepFromInput = false) {
     const wrapper = document.querySelector(`.${rangeSliderSelector}`);
     if (!wrapper) return;
@@ -95,7 +96,7 @@ function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, s
     let adjustedValue = Math.max(min, Math.min(numericValue, max));
     console.log('Adjusted value within range:', adjustedValue);
 
-    // Only snap to stepSize when the handle is being used (not manual input)
+    // Only snap to stepSize when the slider handle is being used, not manual input
     if (!stepFromInput && stepSize) {
         adjustedValue = Math.round(adjustedValue / stepSize) * stepSize;
         console.log('Value snapped to nearest step:', adjustedValue);
@@ -127,10 +128,7 @@ function updateRangeSliderPosition(rangeSliderSelector, value, withTransition, s
         handleText.textContent = adjustedValue;
         console.log('Updated handle text:', adjustedValue);
     }
-}
-
-   
-    
+}    
 
     // Sync input field value with slider handle text
     function setInputValue(rangeSliderSelector, inputId) {
