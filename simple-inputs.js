@@ -1,6 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const numericInputs = document.querySelectorAll('.input-calculator');
 
+
+     // Debounce function to delay the snapping until the user stops typing
+     function debounce(func, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
     // List of input IDs that should allow commas
     const allowCommaFields = ['wunschgewicht', 'weight-2', 'weight-3-kfa'];
 
@@ -37,8 +49,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const valueForSlider = sanitizedValue.replace(/,/g, '.');
                 updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, valueForSlider, true, true); // Added true here
             });
+        } else if (input.id === 'steps-4') {
+            // Apply debounce to 'steps-4' input for steps slider only
+            input.addEventListener('input', debounce(() => {
+                if (input.isProgrammaticChange) return;
+
+                const originalValue = input.value;
+                const sanitizedValue = input.value.replace(/[^0-9]/g, '');
+
+                if (originalValue !== sanitizedValue) {
+                    // Update the flag to indicate a programmatic change
+                    input.isProgrammaticChange = true;
+                    input.value = sanitizedValue;
+                    input.isProgrammaticChange = false;
+                }
+
+                // Update the slider position even if the input is empty
+                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="wrapper-4"]`, sanitizedValue, true, true);
+            }, 300));  // Apply a 300ms debounce for steps input
         } else {
-            // Allow only numbers for other fields
+            // Allow only numbers for other fields without debounce
             input.addEventListener('input', () => {
                 if (input.isProgrammaticChange) return;
 
@@ -53,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 // Update the slider position even if the input is empty
-                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, sanitizedValue, true, true); // Added true here for no snapping
+                updateRangeSliderPosition(`wrapper-step-range_slider[fs-rangeslider-element="${input.id}"]`, sanitizedValue, true, true);
             });
         }
     });
