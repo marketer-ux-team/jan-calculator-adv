@@ -1178,7 +1178,7 @@ function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
 
             for (let i = 0; i < timeIntervals.length; i++) {
                 let date = new Date(currentDate.getTime());
-                date.setDate(currentDate.getDate() + Math.floor(timeIntervals[i] * 7)); // Convert weeks to days
+                date.setDate(currentDate.getDate() + Math.round(timeIntervals[i] * 7)); // Convert weeks to days
                 dates.push(date.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' }));
             }
 
