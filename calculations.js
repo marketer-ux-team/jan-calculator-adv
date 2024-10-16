@@ -1047,30 +1047,31 @@ function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
         function calculateWeightDataPoints(currentWeight, targetWeight, totalWeeks, weeklyWeightLossPercentage) {
             const weightData = [];
             const timeIntervals = [];
-            
-            let numberOfPoints = 10; // Default number of data points
         
-            // Check if totalWeeks / numberOfPoints results in a decimal
-            if (totalWeeks / numberOfPoints % 1 !== 0) {
-                numberOfPoints += 1; // Add one more point to avoid decimals in intervals
-            }
+            // Decide on the time interval for your data points (e.g., 1 week)
+            const intervalWeeks = 1;
         
-            // Calculate evenly spaced time intervals
+            // Calculate the number of data points based on totalWeeks and intervalWeeks
+            const numberOfPoints = Math.ceil(totalWeeks / intervalWeeks);
+        
+            // Generate time intervals
             for (let i = 0; i <= numberOfPoints; i++) {
-                let t = (totalWeeks / numberOfPoints) * i;
+                let t = intervalWeeks * i;
+                if (t > totalWeeks) {
+                    t = totalWeeks; // Ensure we don't exceed totalWeeks
+                }
                 timeIntervals.push(t);
             }
         
-            // Generate weight data using compound weight loss formula
-            for (let i = 0; i <= numberOfPoints; i++) {
+            // Generate weight data using the compound weight loss formula
+            for (let i = 0; i < timeIntervals.length; i++) {
                 let weeksPassed = timeIntervals[i];
         
-                // Using compound interest formula for weight loss
-                // weight = initialWeight * (1 - weeklyWeightLossPercentage)^(weeksPassed)
+                // Calculate the weight at the current time interval
                 let weight = currentWeight * Math.pow(1 - weeklyWeightLossPercentage, weeksPassed);
         
-                // Ensure the last weight is exactly the target weight
-                if (i === numberOfPoints) {
+                // Ensure the weight does not fall below the target weight
+                if (weight < targetWeight) {
                     weight = targetWeight;
                 }
         
@@ -1079,6 +1080,7 @@ function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
         
             return { weightData, timeIntervals };
         }
+        
         
 
         // Function to generate the chart
