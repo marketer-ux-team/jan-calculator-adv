@@ -1047,32 +1047,39 @@ function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
         function calculateWeightDataPoints(currentWeight, targetWeight, totalWeeks, weeklyWeightLossPercentage) {
             const weightData = [];
             const timeIntervals = [];
-            const numberOfPoints = 10; // Number of data points (dots)
-
+            
+            let numberOfPoints = 10; // Default number of data points
+        
+            // Check if totalWeeks / numberOfPoints results in a decimal
+            if (totalWeeks / numberOfPoints % 1 !== 0) {
+                numberOfPoints += 1; // Add one more point to avoid decimals in intervals
+            }
+        
             // Calculate evenly spaced time intervals
             for (let i = 0; i <= numberOfPoints; i++) {
                 let t = (totalWeeks / numberOfPoints) * i;
                 timeIntervals.push(t);
             }
-
+        
             // Generate weight data using compound weight loss formula
             for (let i = 0; i <= numberOfPoints; i++) {
                 let weeksPassed = timeIntervals[i];
-
+        
                 // Using compound interest formula for weight loss
                 // weight = initialWeight * (1 - weeklyWeightLossPercentage)^(weeksPassed)
                 let weight = currentWeight * Math.pow(1 - weeklyWeightLossPercentage, weeksPassed);
-
+        
                 // Ensure the last weight is exactly the target weight
                 if (i === numberOfPoints) {
                     weight = targetWeight;
                 }
-
+        
                 weightData.push(parseFloat(weight.toFixed(1)));
             }
-
+        
             return { weightData, timeIntervals };
         }
+        
 
         // Function to generate the chart
         function generateResultChart(weightData, timeIntervals) {
