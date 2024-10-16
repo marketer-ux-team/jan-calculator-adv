@@ -1047,41 +1047,32 @@ function hideWarningOnSliderInput(sliderElement, inputElement, warningElement) {
         function calculateWeightDataPoints(currentWeight, targetWeight, totalWeeks, weeklyWeightLossPercentage) {
             const weightData = [];
             const timeIntervals = [];
-        
-            // Decide on the time interval for your data points (e.g., 1 week)
-            const intervalWeeks = 1;
-        
-            // Calculate the number of data points based on totalWeeks and intervalWeeks
-            const numberOfPoints = Math.ceil(totalWeeks / intervalWeeks);
-        
-            // Generate time intervals
+            const numberOfPoints = 10; // Number of data points (dots)
+
+            // Calculate evenly spaced time intervals
             for (let i = 0; i <= numberOfPoints; i++) {
-                let t = intervalWeeks * i;
-                if (t > totalWeeks) {
-                    t = totalWeeks; // Ensure we don't exceed totalWeeks
-                }
+                let t = (totalWeeks / numberOfPoints) * i;
                 timeIntervals.push(t);
             }
-        
-            // Generate weight data using the compound weight loss formula
-            for (let i = 0; i < timeIntervals.length; i++) {
+
+            // Generate weight data using compound weight loss formula
+            for (let i = 0; i <= numberOfPoints; i++) {
                 let weeksPassed = timeIntervals[i];
-        
-                // Calculate the weight at the current time interval
+
+                // Using compound interest formula for weight loss
+                // weight = initialWeight * (1 - weeklyWeightLossPercentage)^(weeksPassed)
                 let weight = currentWeight * Math.pow(1 - weeklyWeightLossPercentage, weeksPassed);
-        
-                // Ensure the weight does not fall below the target weight
-                if (weight < targetWeight) {
+
+                // Ensure the last weight is exactly the target weight
+                if (i === numberOfPoints) {
                     weight = targetWeight;
                 }
-        
+
                 weightData.push(parseFloat(weight.toFixed(1)));
             }
-        
+
             return { weightData, timeIntervals };
         }
-        
-        
 
         // Function to generate the chart
         function generateResultChart(weightData, timeIntervals) {
